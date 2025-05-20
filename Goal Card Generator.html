@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>目標生成集點卡</title>
+  <title>產生目標集點卡</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -46,16 +46,23 @@
       text-align: justify;
       overflow: visible;
       white-space: normal;
+      text-align-last: center;
     }
     .footer {
       margin-top: 20px;
       font-size: 14px;
       color: #333;
     }
+    @media (max-width: 768px) {
+      canvas {
+        width: 100%;
+        height: auto;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>目標生成集點卡</h2>
+  <h2>產生目標集點卡</h2>
   <div class="description">
     產生一張鼓勵的目標集點卡記錄你的每一步。格數採每週5天共4週設計20格，計畫一個月內可以達成目標。
     請依欄位填入文字，選擇符合目標的圖片上傳，產生卡片可供4*6吋列印。
@@ -109,7 +116,23 @@
       const date = new Date().toISOString().slice(0, 10);
 
       if (bgImg && bgImg.complete) {
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+        const imgRatio = bgImg.width / bgImg.height;
+        const canvasRatio = canvas.width / canvas.height;
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (imgRatio > canvasRatio) {
+          drawHeight = canvas.height;
+          drawWidth = bgImg.width * (canvas.height / bgImg.height);
+          offsetX = (canvas.width - drawWidth) / 2;
+          offsetY = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = bgImg.height * (canvas.width / bgImg.width);
+          offsetX = 0;
+          offsetY = (canvas.height - drawHeight) / 2;
+        }
+
+        ctx.drawImage(bgImg, offsetX, offsetY, drawWidth, drawHeight);
       } else {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
