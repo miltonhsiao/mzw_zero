@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>從混沌到構圖｜創作誌</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', 'Noto Sans TC', sans-serif;
+      background: #ffffff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      line-height: 1.8;
+    }
+    .container {
+      max-width: 700px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 0.3em;
+    }
+    .meta {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 30px;
+    }
+    img {
+      max-width: 100%;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 12px;
+      overflow-x: auto;
+      border-radius: 4px;
+    }
+    code {
+      font-family: 'Courier New', monospace;
+    }
+    a {
+      color: #0057ff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>從混沌到構圖：一次生成圖像的靈感之旅</h1>
+    <div class="meta">2025 年 5 月 18 日 ・ #generative-art #p5js</div>
+
+    <p>有時候創作並非來自明確的計畫，而是一段段的失敗與意外的交錯。</p>
+
+    <p>這次我從一個色塊亂數排列的小實驗開始，原本只是想做一個「隨機色彩構成的方格牆」，但幾次不經意的參數錯誤，讓我看到了「破壞結構」的美感。</p>
+
+    <img src="images/generative-grid.jpg" alt="generative grid experiment" />
+
+    <p>下方是當時的核心程式碼片段：</p>
+
+    <pre><code>for (let i = 0; i < cols; i++) {
+  for (let j = 0; j < rows; j++) {
+    let w = width / cols;
+    let h = height / rows;
+    let c = color(random(255), random(255), random(255), 150);
+    fill(c);
+    rect(i * w, j * h, w, h);
+  }
+}
+</code></pre>
+
+    <p>結論是：意外往往比規劃更誠實。當我不再執著完美構圖，而是觀察程式本身的「行為」，它反而回饋了我一種節奏。</p>
+
+    <p><a href="journal.html">← 返回創作誌</a></p>
+  </div>
+
+</body>
+</html>
