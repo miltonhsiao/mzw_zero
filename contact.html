@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>聯絡我｜Your Name</title>
+  <style>
+    body {
+      font-family: 'Noto Sans TC', 'Helvetica Neue', sans-serif;
+      background: #f8f8f8;
+      color: #222;
+      margin: 0;
+      line-height: 1.8;
+    }
+
+    header {
+      text-align: center;
+      padding: 60px 20px 20px;
+      background: #fff;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.3em;
+    }
+
+    p.description {
+      color: #666;
+      font-size: 1em;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, textarea {
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      background: white;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #0057ff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #003fcc;
+    }
+
+    .contact-info {
+      margin-top: 40px;
+      font-size: 0.95em;
+      color: #666;
+      text-align: center;
+    }
+
+    .contact-info a {
+      color: #0057ff;
+      text-decoration: none;
+      margin: 0 6px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85em;
+      color: #aaa;
+      margin: 60px 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>聯絡我</h1>
+    <p class="description">你可以透過表單或社群聯繫我。歡迎來信討論合作、創作交流、或提出任何想法。</p>
+  </header>
+
+  <div class="container">
+    <form action="https://formspree.io/f/your-id" method="POST">
+      <label for="name">你的名字</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="email">你的電子郵件</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="message">訊息內容</label>
+      <textarea id="message" name="message" required></textarea>
+
+      <button type="submit">送出訊息</button>
+    </form>
+
+    <div class="contact-info">
+      或直接聯絡我：  
+      <a href="mailto:you@example.com">you@example.com</a><br><br>
+      社群連結：  
+      <a href="https://github.com/yourhandle" target="_blank">GitHub</a> / 
+      <a href="https://instagram.com/yourhandle" target="_blank">Instagram</a>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 你的名字｜創作與思考的紀錄
+  </footer>
+
+</body>
+</html>
