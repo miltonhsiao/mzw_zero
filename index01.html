@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>你的名字 - 創作者首頁</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', 'Noto Sans TC', sans-serif;
+      background: #f7f7f7;
+      color: #222;
+      line-height: 1.6;
+    }
+    header {
+      padding: 80px 20px 40px;
+      text-align: center;
+      background-color: #fff;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin: 0 0 0.4em;
+      font-weight: normal;
+    }
+    p.tagline {
+      font-size: 1.1em;
+      color: #666;
+    }
+    nav {
+      margin-top: 20px;
+    }
+    nav a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #0057ff;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .project-card {
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #eee;
+      transition: all 0.2s ease;
+    }
+    .project-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-color: #ddd;
+    }
+    .project-card img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 12px;
+    }
+    .project-card h3 {
+      margin: 0 0 0.4em;
+      font-size: 1.1em;
+    }
+    .project-card p {
+      font-size: 0.9em;
+      color: #555;
+    }
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 0.9em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>你的名字 / Your Name</h1>
+    <p class="tagline">圖像與程式交會之處，創造有機的數位生命。</p>
+    <nav>
+      <a href="about.html">關於我</a>
+      <a href="projects.html">作品</a>
+      <a href="journal.html">創作誌</a>
+      <a href="contact.html">聯絡</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <section>
+      <h2>精選作品</h2>
+      <div class="project-grid">
+        <div class="project-card">
+          <a href="fractal-garden.html">
+            <img src="images/fractal-thumb.jpg" alt="Fractal Garden">
+            <h3>Fractal Garden</h3>
+            <p>模擬植物成長的生成藝術，結合 L-system 與 noise。</p>
+          </a>
+        </div>
+        <div class="project-card">
+          <a href="wavescape.html">
+            <img src="images/wavescape-thumb.jpg" alt="Wavescape">
+            <h3>Wavescape</h3>
+            <p>聲音驅動的動態視覺場景，探索聲波的形狀與光影。</p>
+          </a>
+        </div>
+        <!-- 可持續新增作品 -->
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    &copy; 2025 你的名字。設計與程式手工製作。
+  </footer>
+
+</body>
+</html>
