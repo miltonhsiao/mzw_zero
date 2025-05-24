@@ -83,20 +83,22 @@
       color: white;
       text-shadow: 1px 1px 2px #000;
       position: relative; /* 為了版權資訊定位 */
-      /* 確保圖片濾鏡只應用於背景圖片，不影響文字內容 */
-      /* CSS filter 應直接作用於 card 元素 */
+      /* **重點修正**：主元素的背景圖片不再直接應用濾鏡 */
+      /* filter: saturate(0.7) brightness(0.7); /* 移除此行 */
     }
-    /* 為了讓文字在濾鏡背景上清晰，可以為文字內容單獨設置背景或調整文字陰影 */
-    .card::before { /* 使用偽元素來應用濾鏡，保持內容清晰 */
+    /* **重點修正**：使用 ::before 偽元素來應用濾鏡 */
+    .card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-size: inherit;
-        background-position: inherit;
-        filter: saturate(0.7) brightness(0.7); /* 圖片濾鏡 */
+        background-size: inherit; /* 繼承 .card 的背景尺寸 */
+        background-position: inherit; /* 繼承 .card 的背景位置 */
+        background-repeat: no-repeat; /* 確保不重複 */
+        /* background-image 透過 JavaScript 設置後，此處會繼承 */
+        filter: saturate(0.7) brightness(0.7); /* **在這裡應用濾鏡** */
         pointer-events: none; /* 讓其不阻擋下方內容的點擊事件 */
         z-index: -1; /* 確保在內容下方 */
     }
@@ -242,7 +244,7 @@
 <body>
 
   <h2>活動邀請卡</h2>
-  <p class="intro-text">產生一張活動邀請卡，營造每個美好的明天!。請依欄位填入文字及數字，選擇符合圖片上傳，產生卡片可供4*6吋列印。QR碼可直接導向GoogleMap開啟地圖位置。歡迎轉貼(請註明來源)。</p>
+  <p class="intro-text">產生一張活動邀請卡，營造每個美好的明天!。請依欄位填入文字及數字，選擇符合圖片上傳，產生卡片可供4*6吋列印。QR碼可直接導向GoogleMap開啟地圖位置。</p>
 
   <div class="form-group">
     <input id="name" placeholder="活動名稱" />
@@ -333,7 +335,7 @@
 
       // 構建 Google Maps URL
       // 使用正確的 Google Maps URL 格式
-      const mapURL = `https://www.google.com/search?q=https://maps.google.com/search%3Fq%3D{encodeURIComponent(addr)}`;
+      const mapURL = `https://www.google.com/maps/search/?api=1\&query=${encodeURIComponent(addr)}`;
 
       const qrCodeContainer = document.getElementById("qrCodeContainer");
 
@@ -363,41 +365,30 @@
       if (bgInput.files.length > 0) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          cardElement.style.backgroundImage = `url('${e.target.result}')`;
-          // 移除舊的偽元素，如果有的話
-          const oldPseudoElement = cardElement.querySelector('.card-pseudo-bg');
-          if (oldPseudoElement) {
-              oldPseudoElement.remove();
-          }
-
-          // 創建一個新的偽元素來應用濾鏡，不影響文字
-          const pseudoElement = document.createElement('div');
-          pseudoElement.className = 'card-pseudo-bg'; // 新增一個 class 方便控制
-          pseudoElement.style.backgroundImage = `url('${e.target.result}')`; // 同樣的背景圖
-          cardElement.appendChild(pseudoElement);
-          // 在 CSS 中定義 .card-pseudo-bg 的濾鏡
+          cardElement.style.backgroundImage = `url('${e.target.result}')`; // 設定主元素的背景圖片
+          // 如果沒有選擇圖片，或者要清除濾鏡效果，可以這樣做：
+          cardElement.classList.add('has-background-image'); // 添加一個 class 以應用濾鏡
         };
         reader.readAsDataURL(bgInput.files.item(0)); // 使用 files.item(0) 更安全
       } else {
-         // 如果沒有選擇圖片，移除背景圖和濾鏡偽元素
+         // 如果沒有選擇圖片，移除背景圖和相關 class
          cardElement.style.backgroundImage = '';
-         const pseudoElement = cardElement.querySelector('.card-pseudo-bg');
-         if (pseudoElement) {
-             pseudoElement.remove();
-         }
+         cardElement.classList.remove('has-background-image'); // 移除 class 以禁用濾鏡
       }
 
-      const card = document.getElementById("card");
+      // 根據文字顏色調整卡片樣式
       if (textColor === 'black') {
-        card.classList.add("black-text");
-        card.classList.remove("white-icons");
+        cardElement.classList.add("black-text");
+        cardElement.classList.remove("white-icons");
       } else {
-        card.classList.remove("black-text");
-        card.classList.add("white-icons");
+        cardElement.classList.remove("black-text");
+        cardElement.classList.add("white-icons");
       }
     }
 
     function downloadImage() {
+      // html2canvas 處理含有 ::before 的元素時，可能需要額外配置或處理
+      // 但通常情況下，html2canvas 應該能正確渲染 CSS 偽元素
       html2canvas(document.getElementById("card"), {
         scale: 3,
         useCORS: true
@@ -410,7 +401,7 @@
     }
   </script>
 
-  <div class="website-footer-copyright">© 2025 MZW</div>
+  <div class="website-footer-copyright">歡迎轉貼試用，網頁測試中 © 2025 MZW</div>
 
 </body>
 </html>
