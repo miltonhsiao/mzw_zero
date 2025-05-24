@@ -7,104 +7,110 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/davidshimjs-qrcodejs@0.0.2/qrcode.min.js"></script>
   <style>
+    /* 設定根元素的字體大小，以便 rem 單位能正確縮放 */
+    :root {
+        font-size: 16px; /* 基礎字體大小，用於 rem 計算 */
+    }
+
     body {
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px;
-      background-color: #eceae6; /* 網頁底色改為 #eceae6 */
+      padding: 1rem; /* 使用 rem */
+      background-color: #eceae6;
     }
     .form-group {
       width: 100%;
-      max-width: 600px;
-      margin-bottom: 20px;
+      max-width: 37.5rem; /* 600px / 16px = 37.5rem */
+      margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
     }
-    /* 新增說明文字的樣式 */
     .intro-text {
       width: 100%;
-      max-width: 600px; /* 與 form-group 寬度相同 */
-      margin-bottom: 20px;
-      text-align: center; /* 讓文字居中 */
-      font-size: 14px;
+      max-width: 37.5rem; /* 600px / 16px = 37.5rem */
+      margin-bottom: 1.25rem;
+      text-align: center;
+      font-size: 0.875rem; /* 14px / 16px = 0.875rem */
       color: #333;
       line-height: 1.5;
     }
-    input, textarea, select { /* 不包含 button */
+    input, textarea, select {
       width: 100%;
-      font-size: 16px;
-      padding: 8px;
-      margin-top: 8px; /* 增加輸入框之間的間距 */
+      font-size: 1rem; /* 16px / 16px = 1rem */
+      padding: 0.5rem; /* 8px / 16px = 0.5rem */
+      margin-top: 0.5rem;
       box-sizing: border-box;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 0.25rem; /* 4px / 16px = 0.25rem */
     }
     input[type="file"] {
-        padding: 4px; /* 檔案上傳框通常不需要太多內邊距 */
+        padding: 0.25rem; /* 4px / 16px = 0.25rem */
     }
-    button { /* 單獨設置按鈕樣式 */
+    button {
         width: 100%;
-        font-size: 16px;
-        padding: 8px;
-        margin-top: 8px; /* 增加按鈕與上方元素的間距 */
+        font-size: 1rem;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
         box-sizing: border-box;
-        background-color: #00b5d8; /* 按鈕顏色改為 #00b5d8 */
+        background-color: #00b5d8;
         color: white;
         border: none;
         cursor: pointer;
-        border-radius: 4px; /* 增加圓角 */
+        border-radius: 0.25rem;
     }
     button:hover {
-        opacity: 0.9; /* 懸停效果 */
+        opacity: 0.9;
     }
     .button-row {
-      margin-top: 12px;
+      margin-top: 0.75rem; /* 12px / 16px = 0.75rem */
       display: flex;
-      gap: 10px;
+      gap: 0.625rem; /* 10px / 16px = 0.625rem */
       flex-wrap: wrap;
     }
     .card-container {
-      width: 600px; /* 預覽畫面寬度 */
-      height: 400px; /* 預覽畫面高度 */
+      /* 預覽畫面的響應式寬度，最大不超過 600px */
+      width: min(90vw, 37.5rem); /* 600px / 16px = 37.5rem */
+      /* 使用 aspect-ratio 保持 3:2 比例 (1800/1200 = 1.5) */
+      aspect-ratio: 3 / 2;
       position: relative;
-      margin-top: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* 增加陰影效果 */
+      margin-top: 1.25rem;
+      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.2); /* 陰影也按比例 */
     }
     .card {
-      width: 100%; /* 佔滿容器 */
-      height: 100%; /* 佔滿容器 */
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: row;
-      background-size: cover;
+      background-size: cover; /* 背景圖片按原圖比例佈滿 */
       background-position: center;
-      border: 2px solid #333;
-      padding: 16px; /* 基於 600x400 預覽的內邊距 */
+      background-repeat: no-repeat; /* 確保不重複 */
+      border: 0.125rem solid #333; /* 2px / 16px = 0.125rem */
+      padding: 1rem; /* 16px / 16px = 1rem */
       box-sizing: border-box;
-      color: white; /* 預設文字顏色為白色 */
-      text-shadow: 1px 1px 2px #000;
-      position: relative; /* 為了版權資訊定位 */
+      color: white;
+      text-shadow: 0.0625rem 0.0625rem 0.125rem #000; /* 1px, 1px, 2px / 16px */
+      position: relative;
     }
-    /* 刪除對背景圖片的濾鏡效果程式碼 */
-    .card::before {
-        content: none; /* 移除偽元素 */
-    }
+
+    /* 刪除對背景圖片的濾鏡效果程式碼 (直接應用於 .card) */
+    /* .card::before { content: none; } */
 
     .card.black-text {
       color: black;
       text-shadow: none;
     }
-    /* 刪除對圖標使用負片效果程式碼，因為我們將直接替換圖標圖片 */
 
+    /* 以下所有尺寸都將基於卡片容器的相對大小 */
     .left {
-      width: 400px; /* 基於 600x400 預覽的寬度 */
+      width: calc(400 / 600 * 100%); /* 400px 佔 600px 的比例 */
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      gap: 10px; /* 基於 600x400 預覽的間距 */
+      gap: 0.625rem; /* 10px */
     }
     .right {
-      width: 200px; /* 基於 600x400 預覽的寬度 */
+      width: calc(200 / 600 * 100%); /* 200px 佔 600px 的比例 */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -120,7 +126,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 10px; /* 基於 600x400 預覽的間距 */
+      gap: 0.625rem;
     }
     .right-bottom {
       text-align: right;
@@ -128,23 +134,23 @@
       flex-direction: column;
       align-items: flex-end;
       justify-content: flex-end;
-      gap: 2px; /* 基於 600x400 預覽的間距 */
+      gap: 0.125rem; /* 2px */
     }
     .event-name {
-      font-size: 24px; /* 基於 600x400 預覽的字體大小 */
+      font-size: 1.5rem; /* 24px */
       font-weight: bold;
     }
     .month-day {
-      font-size: 75px; /* 基於 600x400 預覽的字體大小 */
+      font-size: 4.6875rem; /* 75px */
       font-weight: bold;
       line-height: 1;
       word-break: break-word;
     }
     #qrCodeContainer {
       background: white;
-      padding: 4px; /* 基於 600x400 預覽的內邊距 */
-      width: 100px; /* 基於 600x400 預覽的尺寸 */
-      height: 100px; /* 基於 600x400 預覽的尺寸 */
+      padding: 0.25rem; /* 4px */
+      width: 6.25rem; /* 100px */
+      height: 6.25rem; /* 100px */
       overflow: hidden;
     }
     #qrCodeContainer canvas, #qrCodeContainer img {
@@ -154,11 +160,11 @@
     .icon-label {
       display: flex;
       align-items: flex-start;
-      gap: 6px; /* 基於 600x400 預覽的間距 */
+      gap: 0.375rem; /* 6px */
     }
     .icon-label img {
-      width: 20px; /* 基於 600x400 預覽的圖片尺寸 */
-      height: 20px; /* 基於 600x400 預覽的圖片尺寸 */
+      width: 1.25rem; /* 20px */
+      height: 1.25rem; /* 20px */
       object-fit: contain;
     }
     .icon-label div {
@@ -170,84 +176,80 @@
     }
     .card-footer-copyright {
       position: absolute;
-      bottom: 8px; /* 基於 600x400 預覽的定位 */
+      bottom: 0.5rem; /* 8px */
       left: 50%;
       transform: translateX(-50%);
-      font-size: 12px; /* 基於 600x400 預覽的字體大小 */
-      color: rgba(255, 255, 255, 0.7); /* 稍微透明 */
-      text-shadow: 0 0 2px #000; /* 確保在亮色背景下可見 */
+      font-size: 0.75rem; /* 12px */
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 0 0.125rem #000; /* 2px */
     }
-    .card.black-text .card-footer-copyright { /* 黑色文字模式下的版權文字 */
+    .card.black-text .card-footer-copyright {
         color: rgba(0, 0, 0, 0.6);
         text-shadow: none;
     }
     .website-footer-copyright {
-        margin-top: 40px;
-        font-size: 14px;
+        margin-top: 2.5rem; /* 40px */
+        font-size: 0.875rem; /* 14px */
         color: #555;
-        text-align: center; /* 確保網頁底部版權文字居中 */
+        text-align: center;
     }
 
-    /* 響應式設計 */
-    @media (max-width: 600px) {
+    /* 手機螢幕響應式調整 */
+    @media (max-width: 37.5rem) { /* 600px */
       .card-container {
-        width: 90%; /* 小螢幕下佔螢幕寬度 90% */
-        height: auto; /* 高度自動調整 */
+        width: 90vw; /* 在小螢幕上使用視窗寬度的 90% */
       }
       .card {
         flex-direction: column; /* 改為垂直堆疊 */
-        height: auto; /* 高度自動調整 */
-        padding: 12px; /* 小螢幕下調整內邊距 */
+        padding: 0.75rem; /* 12px */
       }
       .left, .right {
         width: 100%; /* 佔滿可用寬度 */
       }
       .left {
-        gap: 8px; /* 小螢幕下調整間距 */
+        gap: 0.5rem; /* 8px */
       }
       .right {
-        margin-top: 15px; /* 上下間距 */
+        margin-top: 0.9375rem; /* 15px */
         align-items: center; /* 內容居中 */
-        gap: 8px; /* 小螢幕下調整間距 */
+        gap: 0.5rem;
       }
       .right-top {
-        align-items: center; /* 右上部分內容居中 */
-        gap: 8px; /* 小螢幕下調整間距 */
+        align-items: center;
+        gap: 0.5rem;
       }
       .right-top .icon-label {
-        justify-content: center; /* 圖標和文字在行內居中 */
+        justify-content: center;
       }
       .right-bottom {
-        align-items: center; /* 右下部分內容居中 */
+        align-items: center;
       }
       #qrCodeContainer {
-          margin-left: auto;
-          margin-right: auto;
-          width: 90px; /* 小螢幕下 QR Code 尺寸微調 */
-          height: 90px;
-          padding: 3px;
+          width: 5.625rem; /* 90px */
+          height: 5.625rem; /* 90px */
+          padding: 0.1875rem; /* 3px */
       }
       .event-name {
-        font-size: 22px; /* 小螢幕下字體大小微調 */
+        font-size: 1.375rem; /* 22px */
       }
       .month-day {
-        font-size: 60px; /* 小螢幕下字體大小微調 */
+        font-size: 3.75rem; /* 60px */
       }
       .icon-label img {
-        width: 18px; /* 小螢幕下圖標尺寸微調 */
-        height: 18px;
+        width: 1.125rem; /* 18px */
+        height: 1.125rem;
       }
       .card-footer-copyright {
-        position: relative; /* 手機視圖下取消絕對定位 */
+        position: relative;
         bottom: auto;
         left: auto;
         transform: none;
         text-align: center;
-        margin-top: 10px; /* 增加間距 */
+        margin-top: 0.625rem; /* 10px */
         width: 100%;
       }
       .intro-text {
-        padding: 0 16px; /* 在小螢幕上給點左右內邊距 */
+        padding: 0 1rem; /* 16px */
       }
     }
   </style>
@@ -265,9 +267,9 @@
     <input id="time" pattern="\d{2}:\d{2}" placeholder="時間（hh:mm）" />
     <input id="host" placeholder="主辦單位" />
     <input id="contact" placeholder="聯絡方式" />
-    <label for="bgImage" style="margin-top: 8px;">上傳背景圖片：</label>
+    <label for="bgImage" style="margin-top: 0.5rem;">上傳背景圖片：</label>
     <input type="file" id="bgImage" accept="image/*" />
-    <label for="textColor" style="margin-top: 8px;">文字顏色：</label>
+    <label for="textColor" style="margin-top: 0.5rem;">文字顏色：</label>
     <select id="textColor">
       <option value="white">白色</option>
       <option value="black">黑色</option>
@@ -454,7 +456,7 @@
         await Promise.all(conversionPromises);
 
         html2canvas(cardElement, {
-            scale: 3, // 將預覽畫布 (600x400) 放大 3 倍，生成 1800x1200 的圖片
+            scale: 3, // 將預覽畫布 (約 600x400) 放大 3 倍，生成 1800x1200 的圖片
             useCORS: true
         }).then(canvas => {
             iconImages.forEach((img, index) => {
