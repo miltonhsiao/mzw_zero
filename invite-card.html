@@ -64,21 +64,21 @@
       flex-wrap: wrap;
     }
     .card-container {
-      width: 600px;
-      height: 400px;
+      width: 600px; /* 預覽畫面寬度 */
+      height: 400px; /* 預覽畫面高度 */
       position: relative;
       margin-top: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* 增加陰影效果 */
     }
     .card {
-      width: 100%;
-      height: 100%;
+      width: 100%; /* 佔滿容器 */
+      height: 100%; /* 佔滿容器 */
       display: flex;
       flex-direction: row;
       background-size: cover;
       background-position: center;
       border: 2px solid #333;
-      padding: 16px;
+      padding: 16px; /* 基於 600x400 預覽的內邊距 */
       box-sizing: border-box;
       color: white; /* 預設文字顏色為白色 */
       text-shadow: 1px 1px 2px #000;
@@ -86,7 +86,6 @@
     }
     /* 刪除對背景圖片的濾鏡效果程式碼 */
     .card::before {
-        /* 移除所有與濾鏡相關的 CSS 屬性 */
         content: none; /* 移除偽元素 */
     }
 
@@ -95,20 +94,17 @@
       text-shadow: none;
     }
     /* 刪除對圖標使用負片效果程式碼，因為我們將直接替換圖標圖片 */
-    /* .card.white-icons .icon-label img {
-      filter: invert(1);
-    } */
 
     .left {
-      width: 400px;
+      width: 400px; /* 基於 600x400 預覽的寬度 */
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      gap: 10px;
+      gap: 10px; /* 基於 600x400 預覽的間距 */
     }
     .right {
-      width: 200px;
+      width: 200px; /* 基於 600x400 預覽的寬度 */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -124,7 +120,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 10px;
+      gap: 10px; /* 基於 600x400 預覽的間距 */
     }
     .right-bottom {
       text-align: right;
@@ -132,23 +128,23 @@
       flex-direction: column;
       align-items: flex-end;
       justify-content: flex-end;
-      gap: 2px;
+      gap: 2px; /* 基於 600x400 預覽的間距 */
     }
     .event-name {
-      font-size: 24px;
+      font-size: 24px; /* 基於 600x400 預覽的字體大小 */
       font-weight: bold;
     }
     .month-day {
-      font-size: 75px;
+      font-size: 75px; /* 基於 600x400 預覽的字體大小 */
       font-weight: bold;
       line-height: 1;
       word-break: break-word;
     }
     #qrCodeContainer {
       background: white;
-      padding: 4px;
-      width: 100px;
-      height: 100px;
+      padding: 4px; /* 基於 600x400 預覽的內邊距 */
+      width: 100px; /* 基於 600x400 預覽的尺寸 */
+      height: 100px; /* 基於 600x400 預覽的尺寸 */
       overflow: hidden;
     }
     #qrCodeContainer canvas, #qrCodeContainer img {
@@ -158,11 +154,11 @@
     .icon-label {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
+      gap: 6px; /* 基於 600x400 預覽的間距 */
     }
     .icon-label img {
-      width: 20px;
-      height: 20px;
+      width: 20px; /* 基於 600x400 預覽的圖片尺寸 */
+      height: 20px; /* 基於 600x400 預覽的圖片尺寸 */
       object-fit: contain;
     }
     .icon-label div {
@@ -174,10 +170,10 @@
     }
     .card-footer-copyright {
       position: absolute;
-      bottom: 8px;
+      bottom: 8px; /* 基於 600x400 預覽的定位 */
       left: 50%;
       transform: translateX(-50%);
-      font-size: 12px;
+      font-size: 12px; /* 基於 600x400 預覽的字體大小 */
       color: rgba(255, 255, 255, 0.7); /* 稍微透明 */
       text-shadow: 0 0 2px #000; /* 確保在亮色背景下可見 */
     }
@@ -192,28 +188,54 @@
         text-align: center; /* 確保網頁底部版權文字居中 */
     }
 
+    /* 響應式設計 */
     @media (max-width: 600px) {
       .card-container {
-        width: 100%;
-        height: auto;
+        width: 90%; /* 小螢幕下佔螢幕寬度 90% */
+        height: auto; /* 高度自動調整 */
       }
       .card {
-        flex-direction: column;
-        height: auto;
+        flex-direction: column; /* 改為垂直堆疊 */
+        height: auto; /* 高度自動調整 */
+        padding: 12px; /* 小螢幕下調整內邊距 */
       }
       .left, .right {
-        width: 100%;
+        width: 100%; /* 佔滿可用寬度 */
+      }
+      .left {
+        gap: 8px; /* 小螢幕下調整間距 */
+      }
+      .right {
+        margin-top: 15px; /* 上下間距 */
+        align-items: center; /* 內容居中 */
+        gap: 8px; /* 小螢幕下調整間距 */
+      }
+      .right-top {
+        align-items: center; /* 右上部分內容居中 */
+        gap: 8px; /* 小螢幕下調整間距 */
+      }
+      .right-top .icon-label {
+        justify-content: center; /* 圖標和文字在行內居中 */
+      }
+      .right-bottom {
+        align-items: center; /* 右下部分內容居中 */
       }
       #qrCodeContainer {
           margin-left: auto;
           margin-right: auto;
-          width: 100px;
+          width: 90px; /* 小螢幕下 QR Code 尺寸微調 */
+          height: 90px;
+          padding: 3px;
       }
-      .right-top {
-        align-items: center;
+      .event-name {
+        font-size: 22px; /* 小螢幕下字體大小微調 */
       }
-      .right-top .icon-label {
-        justify-content: center;
+      .month-day {
+        font-size: 60px; /* 小螢幕下字體大小微調 */
+      }
+      .icon-label img {
+        width: 18px; /* 小螢幕下圖標尺寸微調 */
+        height: 18px;
       }
       .card-footer-copyright {
         position: relative; /* 手機視圖下取消絕對定位 */
@@ -349,6 +371,7 @@
       document.getElementById("yearIcon").src = iconMap[textColor].year;
       document.getElementById("timeIcon").src = iconMap[textColor].time;
 
+      // 構建 Google Maps URL (使用更標準的搜尋 URL 格式)
       const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
       const qrCodeContainer = document.getElementById("qrCodeContainer");
 
@@ -383,13 +406,11 @@
          cardElement.style.backgroundImage = '';
       }
 
-      // 只用於切換文字顏色，不再用於圖標濾鏡
+      // 只用於切換文字顏色
       if (textColor === 'black') {
         cardElement.classList.add("black-text");
-        cardElement.classList.remove("white-icons"); /* 雖然 white-icons 類別已無 filter 效果，但保留切換以防未來擴展 */
       } else {
         cardElement.classList.remove("black-text");
-        cardElement.classList.add("white-icons"); /* 同上 */
       }
     }
 
@@ -433,7 +454,7 @@
         await Promise.all(conversionPromises);
 
         html2canvas(cardElement, {
-            scale: 3,
+            scale: 3, // 將預覽畫布 (600x400) 放大 3 倍，生成 1800x1200 的圖片
             useCORS: true
         }).then(canvas => {
             iconImages.forEach((img, index) => {
