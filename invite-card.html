@@ -97,7 +97,7 @@
       text-shadow: none;
     }
 
-    /* 左、右區寬度按2:1比例 */
+    /* 左、右區寬度按2:1比例 (PC/Tablet 模式) */
     .left {
       width: calc(2 / 3 * 100%); /* 2/3 寬度 */
       display: flex;
@@ -239,8 +239,9 @@
       .event-name {
         font-size: 1.375rem; /* 22px */
       }
+      /* 調整手機模式下日期 mm/dd 的字體大小，避免溢出 */
       .month-day {
-        font-size: 3.75rem; /* 60px */
+        font-size: 3.5rem; /* 從 3.75rem 縮小到 3.5rem (約 56px)，可依測試結果微調 */
       }
       .icon-label img {
         width: 1.125rem; /* 18px */
