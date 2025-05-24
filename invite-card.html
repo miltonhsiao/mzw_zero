@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>活動邀請卡</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/davidshimjs-qrcodejs@0.0.2/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background-color: #eceae6; /* 網頁底色改為 #eceae6 */
+    }
+    .form-group {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+    /* 新增說明文字的樣式 */
+    .intro-text {
+      width: 100%;
+      max-width: 600px; /* 與 form-group 寬度相同 */
+      margin-bottom: 20px;
+      text-align: center; /* 讓文字居中 */
+      font-size: 14px;
+      color: #333;
+      line-height: 1.5;
+    }
+    /* 移除 label 的樣式，因為不再使用 label 了 */
+    /* label {
+      font-weight: bold;
+      display: block;
+      margin-top: 8px;
+    } */
+    input, textarea, select { /* 不包含 button */
+      width: 100%;
+      font-size: 16px;
+      padding: 8px;
+      margin-top: 8px; /* 增加輸入框之間的間距 */
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="file"] {
+        padding: 4px; /* 檔案上傳框通常不需要太多內邊距 */
+    }
+    button { /* 單獨設置按鈕樣式 */
+        width: 100%;
+        font-size: 16px;
+        padding: 8px;
+        margin-top: 8px; /* 增加按鈕與上方元素的間距 */
+        box-sizing: border-box;
+        background-color: #00b5d8; /* 按鈕顏色改為 #00b5d8 */
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px; /* 增加圓角 */
+    }
+    button:hover {
+        opacity: 0.9; /* 懸停效果 */
+    }
+    .button-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .card-container {
+      width: 600px;
+      height: 400px;
+      position: relative;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* 增加陰影效果 */
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #333;
+      padding: 16px;
+      box-sizing: border-box;
+      color: white;
+      text-shadow: 1px 1px 2px #000;
+      position: relative; /* 為了版權資訊定位 */
+    }
+    .card.black-text {
+      color: black;
+      text-shadow: none;
+    }
+    .card.white-icons .icon-label img {
+      filter: invert(1);
+    }
+    .left {
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+    .right {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .right-top > *, .right-bottom > *, .left > * {
+      max-width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+    }
+    .right-top {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .right-bottom {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 2px;
+    }
+    .event-name {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .month-day {
+      font-size: 75px;
+      font-weight: bold;
+      line-height: 1;
+      word-break: break-word;
+    }
+    #qrCodeContainer {
+      background: white;
+      padding: 4px;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+    }
+    #qrCodeContainer canvas, #qrCodeContainer img {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .icon-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .icon-label img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+    .icon-label div {
+      flex: 1;
+    }
+    .right-top .icon-label {
+        justify-content: flex-end;
+        width: 100%;
+    }
+    .card-footer-copyright {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7); /* 稍微透明 */
+      text-shadow: 0 0 2px #000; /* 確保在亮色背景下可見 */
+    }
+    .card.black-text .card-footer-copyright { /* 黑色文字模式下的版權文字 */
+        color: rgba(0, 0, 0, 0.6);
+        text-shadow: none;
+    }
+    .website-footer-copyright {
+        margin-top: 40px;
+        font-size: 14px;
+        color: #555;
+        text-align: center; /* 確保網頁底部版權文字居中 */
+    }
+
+    @media (max-width: 600px) {
+      .card-container {
+        width: 100%;
+        height: auto;
+      }
+      .card {
+        flex-direction: column;
+        height: auto;
+      }
+      .left, .right {
+        width: 100%;
+      }
+      #qrCodeContainer {
+          margin-left: auto;
+          margin-right: auto;
+          width: 100px;
+      }
+      .right-top {
+        align-items: center;
+      }
+      .right-top .icon-label {
+        justify-content: center;
+      }
+      .card-footer-copyright {
+        position: relative; /* 手機視圖下取消絕對定位 */
+        bottom: auto;
+        left: auto;
+        transform: none;
+        text-align: center;
+        margin-top: 10px; /* 增加間距 */
+        width: 100%;
+      }
+      .intro-text {
+        padding: 0 16px; /* 在小螢幕上給點左右內邊距 */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>活動邀請卡</h2>
+  <p class="intro-text">產生一張活動邀請卡，營造每個美好的明天!。請依欄位填入文字及數字，選擇符合圖片上傳，產生卡片可供4*6吋列印。QR碼可直接導向GoogleMap開啟地圖位置。</p>
+
+  <div class="form-group">
+    <input id="name" placeholder="活動名稱" />
+    <textarea id="description" placeholder="說明"></textarea>
+    <input id="address" placeholder="地址" />
+    <input id="date" pattern="\d{4}/\d{2}/\d{2}" placeholder="日期（yyyy/mm/dd）" />
+    <input id="time" pattern="\d{2}:\d{2}" placeholder="時間（hh:mm）" />
+    <input id="host" placeholder="主辦單位" />
+    <input id="contact" placeholder="聯絡方式" />
+    <label for="bgImage" style="margin-top: 8px;">上傳背景圖片：</label>
+    <input type="file" id="bgImage" accept="image/*" />
+    <label for="textColor" style="margin-top: 8px;">文字顏色：</label>
+    <select id="textColor">
+      <option value="white">白色</option>
+      <option value="black">黑色</option>
+    </select>
+    <div class="button-row">
+      <button onclick="updateCard()">產生卡片</button>
+      <button onclick="downloadImage()">下載卡片圖片</button>
+    </div>
+  </div>
+
+  <div class="card-container" id="cardWrapper">
+    <div class="card" id="card">
+      <div class="left">
+        <div class="event-name" id="cardName">活動名稱</div>
+        <div class="icon-label">
+          <img src="https://api.iconify.design/material-symbols/description.svg" alt="說明">
+          <div id="cardDescription">活動說明</div>
+        </div>
+        <div class="icon-label">
+          <img src="https://api.iconify.design/ph/user-fill.svg" alt="主辦">
+          <div id="cardHost">主辦單位</div>
+        </div>
+        <div class="icon-label">
+          <img src="https://api.iconify.design/mdi/mobile-phone.svg" alt="聯絡方式">
+          <div id="cardContact">聯絡方式</div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="right-top">
+          <div class="icon-label" style="justify-content: flex-end;">
+            <img src="https://api.iconify.design/material-symbols/location-on.svg" alt="地址">
+            <div id="cardAddress">地址</div>
+          </div>
+          <div id="qrCodeContainer"></div>
+        </div>
+        <div class="right-bottom">
+          <div class="icon-label">
+            <img src="https://api.iconify.design/material-symbols/calendar-month.svg" alt="日期">
+            <div id="yearLine">2025</div>
+          </div>
+          <div class="month-day" id="monthDayLine">05/24</div>
+          <div class="icon-label">
+            <img src="https://api.iconify.design/material-symbols/schedule.svg" alt="時間">
+            <div id="timeLine">18:00</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-copyright">© 2025 MZW</div>
+    </div>
+  </div>
+
+  <script>
+    // 在全域範圍定義 qrCodeInstance 變數，用於儲存 QR Code 實例
+    let qrCodeInstance = null;
+
+    function updateCard() {
+      const name = document.getElementById("name").value;
+      const desc = document.getElementById("description").value;
+      const addr = document.getElementById("address").value;
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value;
+      const host = document.getElementById("host").value;
+      const contact = document.getElementById("contact").value;
+      const textColor = document.getElementById("textColor").value;
+
+      document.getElementById("cardName").textContent = name;
+      document.getElementById("cardDescription").textContent = desc;
+      document.getElementById("cardAddress").textContent = addr;
+      document.getElementById("cardHost").textContent = host;
+      document.getElementById("cardContact").textContent = contact;
+      document.getElementById("timeLine").textContent = time;
+
+      const [y, m, d] = date.split("/");
+      document.getElementById("yearLine").textContent = y || '';
+      document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
+
+      // 構建 Google Maps URL
+      const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+
+      const qrCodeContainer = document.getElementById("qrCodeContainer");
+
+      // 如果已經有 QR Code 實例，先清空容器，以便重新生成
+      if (qrCodeInstance) {
+        qrCodeContainer.innerHTML = ''; // 清空舊的 QR Code
+        qrCodeInstance = null; // 重置實例
+      }
+
+      // 只有當地址不為空時才生成 QR Code
+      if (addr) {
+          qrCodeInstance = new QRCode(qrCodeContainer, {
+              text: mapURL, // QR Code 的內容就是這個地圖 URL
+              width: 100,
+              height: 100,
+              colorDark : "#000000",
+              colorLight : "#ffffff",
+              correctLevel : QRCode.CorrectLevel.H // 錯誤修正等級 (L, M, Q, H)
+          });
+      } else {
+          qrCodeContainer.innerHTML = ''; // 如果地址為空，也清空 QR Code
+      }
+
+      const bgInput = document.getElementById("bgImage");
+      if (bgInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("card").style.backgroundImage = `url('${e.target.result}')`;
+        };
+        reader.readAsDataURL(bgInput.files[0]);
+      }
+
+      const card = document.getElementById("card");
+      if (textColor === 'black') {
+        card.classList.add("black-text");
+        card.classList.remove("white-icons");
+      } else {
+        card.classList.remove("black-text");
+        card.classList.add("white-icons");
+      }
+    }
+
+    function downloadImage() {
+      html2canvas(document.getElementById("card"), {
+        scale: 3,
+        useCORS: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'invitation_card.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+
+  <div class="website-footer-copyright">歡迎轉貼試用，網頁測試中  © 2025 MZW</div>
+
+</body>
+</html>
