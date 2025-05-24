@@ -80,36 +80,25 @@
       border: 2px solid #333;
       padding: 16px;
       box-sizing: border-box;
-      color: white;
+      color: white; /* 預設文字顏色為白色 */
       text-shadow: 1px 1px 2px #000;
       position: relative; /* 為了版權資訊定位 */
-      /* **重點修正**：主元素的背景圖片不再直接應用濾鏡 */
-      /* filter: saturate(0.7) brightness(0.7); /* 移除此行 */
     }
-    /* **重點修正**：使用 ::before 偽元素來應用濾鏡 */
+    /* 刪除對背景圖片的濾鏡效果程式碼 */
     .card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: inherit; /* 繼承 .card 的背景尺寸 */
-        background-position: inherit; /* 繼承 .card 的背景位置 */
-        background-repeat: no-repeat; /* 確保不重複 */
-        /* background-image 透過 JavaScript 設置後，此處會繼承 */
-        filter: saturate(0.7) brightness(0.7); /* **在這裡應用濾鏡** */
-        pointer-events: none; /* 讓其不阻擋下方內容的點擊事件 */
-        z-index: -1; /* 確保在內容下方 */
+        /* 移除所有與濾鏡相關的 CSS 屬性 */
+        content: none; /* 移除偽元素 */
     }
 
     .card.black-text {
       color: black;
       text-shadow: none;
     }
-    .card.white-icons .icon-label img {
+    /* 刪除對圖標使用負片效果程式碼，因為我們將直接替換圖標圖片 */
+    /* .card.white-icons .icon-label img {
       filter: invert(1);
-    }
+    } */
+
     .left {
       width: 400px;
       display: flex;
@@ -263,7 +252,7 @@
     </select>
     <div class="button-row">
       <button onclick="updateCard()">產生卡片</button>
-      <button onclick="downloadImage()">下載卡片圖片</button>
+      <button onclick="downloadImage()">下載卡片</button>
     </div>
   </div>
 
@@ -272,34 +261,34 @@
       <div class="left">
         <div class="event-name" id="cardName">活動名稱</div>
         <div class="icon-label">
-          <img src="https://api.iconify.design/material-symbols/description.svg" alt="說明">
+          <img id="descIcon" class="icon-img" src="https://api.iconify.design/material-symbols/tooltip-2-outline.svg" alt="說明">
           <div id="cardDescription">活動說明</div>
         </div>
         <div class="icon-label">
-          <img src="https://api.iconify.design/ph/user-fill.svg" alt="主辦">
+          <img id="hostIcon" class="icon-img" src="https://api.iconify.design/material-symbols/person-outline.svg" alt="主辦">
           <div id="cardHost">主辦單位</div>
         </div>
         <div class="icon-label">
-          <img src="https://api.iconify.design/mdi/mobile-phone.svg" alt="聯絡方式">
+          <img id="contactIcon" class="icon-img" src="https://api.iconify.design/material-symbols/phone-in-talk-outline.svg" alt="聯絡方式">
           <div id="cardContact">聯絡方式</div>
         </div>
       </div>
       <div class="right">
         <div class="right-top">
           <div class="icon-label" style="justify-content: flex-end;">
-            <img src="https://api.iconify.design/material-symbols/location-on.svg" alt="地址">
+            <img id="addressIcon" class="icon-img" src="https://api.iconify.design/material-symbols/location-on-outline.svg" alt="地址">
             <div id="cardAddress">地址</div>
           </div>
           <div id="qrCodeContainer"></div>
         </div>
         <div class="right-bottom">
           <div class="icon-label">
-            <img src="https://api.iconify.design/material-symbols/calendar-month.svg" alt="日期">
+            <img id="yearIcon" class="icon-img" src="https://api.iconify.design/material-symbols/calendar-month-outline.svg" alt="日期">
             <div id="yearLine">2025</div>
           </div>
           <div class="month-day" id="monthDayLine">05/24</div>
           <div class="icon-label">
-            <img src="https://api.iconify.design/material-symbols/schedule.svg" alt="時間">
+            <img id="timeIcon" class="icon-img" src="https://api.iconify.design/material-symbols/schedule-outline-rounded.svg" alt="時間">
             <div id="timeLine">18:00</div>
           </div>
         </div>
@@ -309,8 +298,27 @@
   </div>
 
   <script>
-    // 在全域範圍定義 qrCodeInstance 變數，用於儲存 QR Code 實例
     let qrCodeInstance = null;
+
+    // 定義圖標 URL 映射
+    const iconMap = {
+      white: {
+        desc: "https://api.iconify.design/material-symbols/tooltip-2-outline.svg",
+        host: "https://api.iconify.design/material-symbols/person-outline.svg",
+        contact: "https://api.iconify.design/material-symbols/phone-in-talk-outline.svg",
+        address: "https://api.iconify.design/material-symbols/location-on-outline.svg",
+        year: "https://api.iconify.design/material-symbols/calendar-month-outline.svg",
+        time: "https://api.iconify.design/material-symbols/schedule-outline-rounded.svg"
+      },
+      black: {
+        desc: "https://api.iconify.design/material-symbols/tooltip-2.svg",
+        host: "https://api.iconify.design/material-symbols/person.svg",
+        contact: "https://api.iconify.design/material-symbols/phone-in-talk.svg",
+        address: "https://api.iconify.design/material-symbols/location-on.svg",
+        year: "https://api.iconify.design/material-symbols/calendar-month.svg",
+        time: "https://api.iconify.design/material-symbols/schedule-rounded.svg"
+      }
+    };
 
     function updateCard() {
       const name = document.getElementById("name").value;
@@ -333,30 +341,33 @@
       document.getElementById("yearLine").textContent = y || '';
       document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
 
-      // 構建 Google Maps URL
-      // 使用正確的 Google Maps URL 格式
-      const mapURL = `https://www.google.com/maps/search/?api=1\&query=${encodeURIComponent(addr)}`;
+      // 根據文字顏色更新圖標 SRC
+      document.getElementById("descIcon").src = iconMap[textColor].desc;
+      document.getElementById("hostIcon").src = iconMap[textColor].host;
+      document.getElementById("contactIcon").src = iconMap[textColor].contact;
+      document.getElementById("addressIcon").src = iconMap[textColor].address;
+      document.getElementById("yearIcon").src = iconMap[textColor].year;
+      document.getElementById("timeIcon").src = iconMap[textColor].time;
 
+      const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
       const qrCodeContainer = document.getElementById("qrCodeContainer");
 
-      // 如果已經有 QR Code 實例，先清空容器，以便重新生成
       if (qrCodeInstance) {
-        qrCodeContainer.innerHTML = ''; // 清空舊的 QR Code
-        qrCodeInstance = null; // 重置實例
+        qrCodeContainer.innerHTML = '';
+        qrCodeInstance = null;
       }
 
-      // 只有當地址不為空時才生成 QR Code
       if (addr) {
           qrCodeInstance = new QRCode(qrCodeContainer, {
-              text: mapURL, // QR Code 的內容就是這個地圖 URL
+              text: mapURL,
               width: 100,
               height: 100,
               colorDark : "#000000",
               colorLight : "#ffffff",
-              correctLevel : QRCode.CorrectLevel.H // 錯誤修正等級 (L, M, Q, H)
+              correctLevel : QRCode.CorrectLevel.H
           });
       } else {
-          qrCodeContainer.innerHTML = ''; // 如果地址為空，也清空 QR Code
+          qrCodeContainer.innerHTML = '';
       }
 
       const bgInput = document.getElementById("bgImage");
@@ -365,43 +376,85 @@
       if (bgInput.files.length > 0) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          cardElement.style.backgroundImage = `url('${e.target.result}')`; // 設定主元素的背景圖片
-          // 如果沒有選擇圖片，或者要清除濾鏡效果，可以這樣做：
-          cardElement.classList.add('has-background-image'); // 添加一個 class 以應用濾鏡
+          cardElement.style.backgroundImage = `url('${e.target.result}')`;
         };
-        reader.readAsDataURL(bgInput.files.item(0)); // 使用 files.item(0) 更安全
+        reader.readAsDataURL(bgInput.files.item(0));
       } else {
-         // 如果沒有選擇圖片，移除背景圖和相關 class
          cardElement.style.backgroundImage = '';
-         cardElement.classList.remove('has-background-image'); // 移除 class 以禁用濾鏡
       }
 
-      // 根據文字顏色調整卡片樣式
+      // 只用於切換文字顏色，不再用於圖標濾鏡
       if (textColor === 'black') {
         cardElement.classList.add("black-text");
-        cardElement.classList.remove("white-icons");
+        cardElement.classList.remove("white-icons"); /* 雖然 white-icons 類別已無 filter 效果，但保留切換以防未來擴展 */
       } else {
         cardElement.classList.remove("black-text");
-        cardElement.classList.add("white-icons");
+        cardElement.classList.add("white-icons"); /* 同上 */
       }
     }
 
-    function downloadImage() {
-      // html2canvas 處理含有 ::before 的元素時，可能需要額外配置或處理
-      // 但通常情況下，html2canvas 應該能正確渲染 CSS 偽元素
-      html2canvas(document.getElementById("card"), {
-        scale: 3,
-        useCORS: true
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'invitation_card.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
+    // 將外部圖片轉換為 Data URL 的輔助函數
+    async function convertImageToDataURL(imgElement) {
+        if (imgElement.src.startsWith('data:')) {
+            return imgElement.src;
+        }
+        try {
+            const response = await fetch(imgElement.src);
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error('Failed to convert image to Data URL:', imgElement.src, error);
+            return imgElement.src;
+        }
+    }
+
+    async function downloadImage() {
+        const cardElement = document.getElementById("card");
+        const iconImages = cardElement.querySelectorAll('.icon-img');
+        const originalSrcs = [];
+
+        const conversionPromises = Array.from(iconImages).map(async (img) => {
+            originalSrcs.push(img.src);
+            if (!img.src.startsWith('data:')) {
+                try {
+                    const dataUrl = await convertImageToDataURL(img);
+                    img.src = dataUrl;
+                } catch (e) {
+                    console.error("轉換圖標為 Data URL 失敗:", e);
+                }
+            }
+        });
+
+        await Promise.all(conversionPromises);
+
+        html2canvas(cardElement, {
+            scale: 3,
+            useCORS: true
+        }).then(canvas => {
+            iconImages.forEach((img, index) => {
+                img.src = originalSrcs[index];
+            });
+
+            const link = document.createElement('a');
+            link.download = 'invitation_card.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(error => {
+            console.error("生成圖片失敗:", error);
+            iconImages.forEach((img, index) => {
+                img.src = originalSrcs[index];
+            });
+            alert('生成圖片失敗，請檢查控制台錯誤。');
+        });
     }
   </script>
 
-  <div class="website-footer-copyright">歡迎轉貼試用，網頁測試中 © 2025 MZW</div>
+  <div class="website-footer-copyright">歡迎轉貼，網頁測試中 © 2025 MZW</div>
 
 </body>
 </html>
