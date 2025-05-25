@@ -134,9 +134,25 @@
       font-size: 0.875rem;
     }
     @media (max-width: 768px) {
-      canvas {
+      .card {
+        flex-direction: column;
+        text-align: left;
+      }
+      .left, .right {
         width: 100%;
-        height: auto;
+        align-items: flex-start;
+        text-align: left;
+      }
+      .right {
+        align-items: flex-start;
+        margin-top: 1em;
+      }
+      .month-day, #timeLine {
+        font-size: 2rem;
+      }
+      .qr {
+        width: 5em;
+        height: 5em;
       }
     }
   </style>
