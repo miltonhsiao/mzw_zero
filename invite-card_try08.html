@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動邀請卡</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <style>
+    :root {
+      --card-width: 37.5rem;
+      --card-height: 25rem;
+    }
+    
+    html {
+      font-size: 16px;
+    }
+    
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background-color: #eceae6;
+      min-height: 100vh;
+    }
+    
+    h2 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    
+    .white {
+      color: white;
+    }
+    
+    .black {
+      color: black;
+    }
+    
+    .form-group {
+      width: var(--card-width);
+      max-width: 100%;
+      margin-bottom: 1.25rem;
+    }
+    
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 0.75rem;
+    }
+    
+    input, textarea, select, button {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.75rem;
+      margin-top: 0.375rem;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    textarea {
+      min-height: 5rem;
+      resize: vertical;
+    }
+    
+    .button-row {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.625rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    button {
+      background-color: #00b5d8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
+      padding: 0.75rem 1.5rem;
+      width: auto;
+      min-width: 10rem;
+    }
+    
+    button:hover {
+      background-color: #0088a3;
+    }
+    
+    .card-container {
+      width: var(--card-width);
+      height: var(--card-height);
+      max-width: 100%;
+      position: relative;
+      margin: 1.25rem auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      background-size: cover;
+      background-position: center;
+      border: 0.125rem solid #333;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      text-shadow: 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .card-bg.active {
+      opacity: 1;
+    }
+    
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 0;
+    }
+    
+    .card.black .card-overlay {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .left {
+      width: 66.66%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+      padding-right: 1rem;
+    }
+    
+    .right {
+      width: 33.33%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: right;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .right > div {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    
+    .event-name {
+      font-size: 1.75rem;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+    
+    .month-day {
+      font-size: 3.5rem;
+      font-weight: bold;
+      line-height: 1;
+      word-break: break-word;
+    }
+    
+    #timeLine {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    
+    .qr {
+      background: white;
+      padding: 0.375rem;
+      width: 7rem;
+      height: 7rem;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .icon-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.25rem 0;
+    }
+    
+    .icon-label iconify-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .description {
+      width: var(--card-width);
+      max-width: 100%;
+      text-align: center;
+      margin: 1rem 0;
+      color: #555;
+      line-height: 1.5;
+      padding: 0 1rem;
+    }
+    
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: #777;
+      text-align: center;
+      padding: 0 1rem;
+    }
+    
+    .card-footer {
+      position: absolute;
+      bottom: 1rem;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.875rem;
+      z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+      :root {
+        --card-width: 100%;
+        --card-height: auto;
+      }
+      
+      html {
+        font-size: 14px;
+      }
+      
+      .card {
+        flex-direction: column;
+        text-align: left;
+        padding: 1.5rem;
+        aspect-ratio: 3/4;
+        min-height: 35rem;
+      }
+      
+      .left, .right {
+        width: 100%;
+        align-items: flex-start;
+        text-align: left;
+      }
+      
+      .left {
+        padding-right: 0;
+        margin-bottom: 1.5rem;
+      }
+      
+      .right {
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+      
+      .right > div {
+        align-items: flex-start;
+        width: 100%;
+      }
+      
+      .month-day {
+        font-size: 3rem;
+      }
+      
+      #timeLine {
+        font-size: 1.75rem;
+      }
+      
+      .qr {
+        width: 6rem;
+        height: 6rem;
+        margin-top: 0.5rem;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      html {
+        font-size: 12px;
+      }
+      
+      .card {
+        min-height: 30rem;
+      }
+      
+      .event-name {
+        font-size: 1.5rem;
+      }
+      
+      .month-day {
+        font-size: 2.5rem;
+      }
+      
+      #timeLine {
+        font-size: 1.5rem;
+      }
+      
+      .qr {
+        width: 5rem;
+        height: 5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>活動卡片資訊輸入</h2>
+  <div class="description">
+    產生一張活動邀請卡，營造每個美好的明天!請依欄位填入文字及數字，選擇符合圖片上傳，產生卡片可供4*6吋列印。QR碼可直接導向GoogleMap開啟地圖位置。
+  </div>
+  
+  <div class="form-group">
+    <input id="name" type="text" placeholder="活動名稱" />
+    <textarea id="description" placeholder="活動說明"></textarea>
+    <input id="address" type="text" placeholder="地址" />
+    <input id="date" type="date" />
+    <input id="time" type="time" />
+    <input id="host" type="text" placeholder="主辦單位" />
+    <input id="contact" type="tel" placeholder="聯絡方式" />
+    <label>上傳背景圖片：</label>
+    <input type="file" id="bgImage" accept="image/*" />
+    <label>文字顏色：</label>
+    <select id="textColor">
+      <option value="white">白色</option>
+      <option value="black">黑色</option>
+    </select>
+    
+    <div class="button-row">
+      <button onclick="updateCard()">預覽卡片</button>
+      <button onclick="downloadImage()">下載卡片</button>
+    </div>
+  </div>
+
+  <div class="card-container" id="cardWrapper">
+    <div class="card white" id="card">
+      <img id="cardBg" class="card-bg" />
+      <div class="card-overlay"></div>
+      
+      <div class="left">
+        <div class="event-name" id="cardName">活動名稱</div>
+        <div class="icon-label">
+          <iconify-icon icon="material-symbols:tooltip"></iconify-icon>
+          <div id="cardDescription">活動說明文字將顯示在此處，請在左側表單輸入詳細資訊。</div>
+        </div>
+        <div class="icon-label">
+          <iconify-icon icon="material-symbols:person"></iconify-icon>
+          <div id="cardHost">主辦單位名稱</div>
+        </div>
+        <div class="icon-label">
+          <iconify-icon icon="material-symbols:phone-in-talk"></iconify-icon>
+          <div id="cardContact">聯絡電話或電子郵件</div>
+        </div>
+      </div>
+      
+      <div class="right">
+        <div>
+          <div class="icon-label">
+            <iconify-icon icon="material-symbols:location-on"></iconify-icon>
+            <div id="cardAddress">活動舉辦地址</div>
+          </div>
+          <div id="qrCodeContainer" class="qr"></div>
+        </div>
+        
+        <div>
+          <div class="icon-label">
+            <iconify-icon icon="material-symbols:calendar-month"></iconify-icon>
+            <div id="yearLine">2025</div>
+          </div>
+          <div class="month-day" id="monthDayLine">05/24</div>
+          <div class="icon-label">
+            <iconify-icon icon="material-symbols:schedule"></iconify-icon>
+            <div id="timeLine">18:00</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-footer">© 2025 活動邀請卡 | 使用前請確認資訊正確</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    歡迎轉貼試用，網頁測試中 | © 2025 MZW
+  </div>
+
+  <script>
+    let qrCodeInstance = null;
+    
+    // 初始化表單默認值
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+      const timeStr = '18:00';
+      
+      document.getElementById('date').value = dateStr;
+      document.getElementById('time').value = timeStr;
+      
+      // 觸發一次更新以顯示默認值
+      setTimeout(updateCard, 100);
+    });
+
+    function updateCard() {
+      // 獲取表單值
+      const name = document.getElementById("name").value || "活動名稱";
+      const desc = document.getElementById("description").value || "活動說明文字將顯示在此處";
+      const addr = document.getElementById("address").value || "活動地址";
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value || "18:00";
+      const host = document.getElementById("host").value || "主辦單位";
+      const contact = document.getElementById("contact").value || "聯絡方式";
+      const textColor = document.getElementById("textColor").value;
+
+      // 更新卡片內容
+      document.getElementById("cardName").textContent = name;
+      document.getElementById("cardDescription").textContent = desc;
+      document.getElementById("cardAddress").textContent = addr;
+      document.getElementById("cardHost").textContent = host;
+      document.getElementById("cardContact").textContent = contact;
+      document.getElementById("timeLine").textContent = time;
+
+      // 處理日期顯示
+      if (date) {
+        const [y, m, d] = date.split("-");
+        document.getElementById("yearLine").textContent = y;
+        document.getElementById("monthDayLine").textContent = `${m}/${d}`;
+      } else {
+        document.getElementById("yearLine").textContent = '';
+        document.getElementById("monthDayLine").textContent = '';
+      }
+
+      // 更新文字顏色
+      const card = document.getElementById("card");
+      card.className = `card ${textColor}`;
+      
+      // 更新圖標顏色
+      document.querySelectorAll('#card iconify-icon').forEach(icon => {
+        icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
+      });
+
+      // 更新QR碼
+      updateQRCode(addr);
+      
+      // 更新背景圖片
+      updateBackgroundImage();
+    }
+
+    function updateQRCode(address) {
+      const qrCodeContainer = document.getElementById("qrCodeContainer");
+      
+      // 清除現有QR碼
+      if (qrCodeInstance) {
+        qrCodeContainer.innerHTML = '';
+        qrCodeInstance = null;
+      }
+      
+      // 如果有地址則生成新QR碼
+      if (address && address !== "活動地址") {
+        const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+        
+        qrCodeInstance = new QRCode(qrCodeContainer, {
+          text: mapURL,
+          width: 128,
+          height: 128,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      } else {
+        qrCodeContainer.innerHTML = '<div style="text-align:center;padding:1rem;">請輸入地址生成QR碼</div>';
+      }
+    }
+
+    function updateBackgroundImage() {
+      const bgInput = document.getElementById("bgImage");
+      const card = document.getElementById("card");
+      const cardBg = document.getElementById("cardBg");
+      
+      if (bgInput.files && bgInput.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          // 使用漸變覆蓋確保文字可讀性
+          card.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('${e.target.result}')`;
+          cardBg.src = e.target.result;
+          cardBg.classList.add('active');
+        };
+        
+        reader.readAsDataURL(bgInput.files[0]);
+      } else {
+        card.style.backgroundImage = '';
+        cardBg.src = '';
+        cardBg.classList.remove('active');
+      }
+    }
+
+    function downloadImage() {
+      const cardWrapper = document.getElementById("cardWrapper");
+      const card = document.getElementById("card");
+      
+      // 定義打印尺寸 (4x6英寸 @ 300 DPI)
+      const printWidth = 6 * 300;  // 1800 pixels
+      const printHeight = 4 * 300; // 1200 pixels
+      
+      // 計算比例因子
+      const scaleX = printWidth / cardWrapper.offsetWidth;
+      const scaleY = printHeight / cardWrapper.offsetHeight;
+      const scale = Math.max(scaleX, scaleY);
+      
+      // 臨時調整卡片尺寸以獲得最佳打印質量
+      const originalWidth = card.style.width;
+      const originalHeight = card.style.height;
+      card.style.width = `${cardWrapper.offsetWidth}px`;
+      card.style.height = `${cardWrapper.offsetHeight}px`;
+      
+      html2canvas(card, {
+        scale: scale,
+        width: cardWrapper.offsetWidth,
+        height: cardWrapper.offsetHeight,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: null,
+        onclone: function(clonedDoc) {
+          // 確保克隆的文檔中也保持正確樣式
+          const clonedCard = clonedDoc.getElementById("card");
+          clonedCard.style.width = `${cardWrapper.offsetWidth}px`;
+          clonedCard.style.height = `${cardWrapper.offsetHeight}px`;
+        }
+      }).then(canvas => {
+        // 恢復原始尺寸
+        card.style.width = originalWidth;
+        card.style.height = originalHeight;
+        
+        // 創建下載鏈接
+        const link = document.createElement("a");
+        link.download = `邀請卡-${document.getElementById("name").value || '活動'}.png`;
+        link.href = canvas.toDataURL("image/png", 1.0);
+        link.click();
+      }).catch(error => {
+        console.error('生成圖片時出錯:', error);
+        alert('生成圖片時出錯，請確保所有內容已正確載入後再試。');
+        // 恢復原始尺寸
+        card.style.width = originalWidth;
+        card.style.height = originalHeight;
+      });
+    }
+  </script>
+</body>
+</html>
