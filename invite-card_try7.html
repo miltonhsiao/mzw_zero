@@ -545,7 +545,7 @@
   <script>
     let qrCodeInstance = null;
 
-    function updateCard() {
+    async function updateCard() {
       const name = document.getElementById("name").value || "活動名稱";
       const desc = document.getElementById("description").value || "活動說明";
       const addr = document.getElementById("address").value || "地址";
@@ -554,6 +554,8 @@
       const host = document.getElementById("host").value || "主辦單位";
       const contact = document.getElementById("contact").value || "聯絡方式";
       const textColor = document.getElementById("textColor").value;
+
+      console.log('Updating card with data:', { name, desc, addr, date, time, host, contact, textColor });
 
       // 更新卡片內容
       document.getElementById("cardName").textContent = name;
@@ -577,12 +579,51 @@
       const card = document.getElementById("card");
       card.className = `card ${textColor}`;
 
+      // 強制設置文字顏色樣式，確保在截圖時可見
+      const textElements = card.querySelectorAll('.event-name, .icon-label div, .month-day, #timeLine, #yearLine, .card-footer');
+      textElements.forEach(el => {
+        el.style.color = textColor === 'black' ? '#000000' : '#ffffff';
+      });
+
       // 更新圖示顏色
       document.querySelectorAll('iconify-icon').forEach(icon => {
         icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
       });
 
-      // 生成 QR 碼
+      // 處理背景圖片
+      const bgInput = document.getElementById("bgImage");
+      const cardBg = document.getElementById("cardBg");
+      
+      if (bgInput.files && bgInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const imageUrl = e.target.result;
+          console.log('Setting background image');
+          
+          // 同時設置背景圖片和img元素
+          card.style.backgroundImage = `url('${imageUrl}')`;
+          card.style.backgroundColor = 'transparent';
+          cardBg.src = imageUrl;
+          cardBg.style.display = 'block';
+        };
+        reader.onerror = function() {
+          console.error('File reading failed');
+        };
+        reader.readAsDataURL(bgInput.files[0]);
+      } else {
+        card.style.backgroundImage = '';
+        card.style.backgroundColor = '#f0f0f0';
+        cardBg.src = '';
+        cardBg.style.display = 'none';
+      }
+
+      // 等待一下再生成 QR 碼，確保其他內容已更新
+      setTimeout(() => {
+        generateQRCode(addr);
+      }, 100);
+    }
+
+    function generateQRCode(addr) {
       const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
       const qrCodeContainer = document.getElementById("qrCodeContainer");
 
@@ -595,6 +636,7 @@
       // 生成新的 QR 碼
       if (addr && addr !== "地址") {
         try {
+          console.log('Generating QR code for:', mapURL);
           qrCodeInstance = new QRCode(qrCodeContainer, {
             text: mapURL,
             width: 100,
@@ -605,33 +647,14 @@
           });
         } catch (error) {
           console.error('QR Code generation failed:', error);
-          qrCodeContainer.innerHTML = '<div style="font-size: 0.7rem; text-align: center; color: #666;">QR碼</div>';
+          qrCodeContainer.innerHTML = '<div style="font-size: 0.7rem; text-align: center; color: #666; background: white; padding: 0.5rem;">QR碼</div>';
         }
       } else {
-        qrCodeContainer.innerHTML = '<div style="font-size: 0.7rem; text-align: center; color: #666;">QR碼</div>';
-      }
-
-      // 處理背景圖片
-      const bgInput = document.getElementById("bgImage");
-      const cardBg = document.getElementById("cardBg");
-      
-      if (bgInput.files && bgInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          card.style.backgroundImage = `url('${e.target.result}')`;
-          cardBg.src = e.target.result;
-        };
-        reader.onerror = function() {
-          console.error('File reading failed');
-        };
-        reader.readAsDataURL(bgInput.files[0]);
-      } else {
-        card.style.backgroundImage = '';
-        cardBg.src = '';
+        qrCodeContainer.innerHTML = '<div style="font-size: 0.7rem; text-align: center; color: #666; background: white; padding: 0.5rem;">QR碼</div>';
       }
     }
 
-    function downloadImage() {
+    async function downloadImage() {
       const cardWrapper = document.getElementById("cardWrapper");
       const card = document.getElementById("card");
       
@@ -640,58 +663,153 @@
         return;
       }
 
-      const originalWidth = cardWrapper.offsetWidth;
-      const originalHeight = cardWrapper.offsetHeight;
-
-      // 高解析度設定 (4×6吋 at 300 DPI)
-      const desiredWidth = 1800; // 6吋 × 300 DPI
-      const desiredHeight = 1200; // 4吋 × 300 DPI
-
-      const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
-
       // 顯示載入提示
-      const button = event.target;
-      const originalText = button.textContent;
-      button.textContent = '生成中...';
-      button.disabled = true;
+      const button = event?.target || document.querySelector('button[onclick="downloadImage()"]');
+      const originalText = button?.textContent || '下載卡片';
+      if (button) {
+        button.textContent = '生成中...';
+        button.disabled = true;
+      }
 
-      html2canvas(card, {
-        width: originalWidth,
-        height: originalHeight,
-        scale: scaleFactor,
-        useCORS: true,
-        logging: false,
-        letterRendering: true,
-        allowTaint: true,
-        backgroundColor: null,
-        foreignObjectRendering: true
-      }).then(canvas => {
-        try {
-          const link = document.createElement("a");
-          const now = new Date();
-          const timestamp = now.getFullYear() + 
-                          String(now.getMonth() + 1).padStart(2, '0') + 
-                          String(now.getDate()).padStart(2, '0') + '_' +
-                          String(now.getHours()).padStart(2, '0') + 
-                          String(now.getMinutes()).padStart(2, '0');
-          
-          link.download = `invitation-card_${timestamp}.png`;
-          link.href = canvas.toDataURL("image/png", 0.95);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } catch (error) {
-          console.error('Download failed:', error);
-          alert('下載失敗，請再試一次');
+      try {
+        // 確保所有內容都已載入
+        await ensureContentLoaded();
+        
+        // 暫時移除一些可能干擾渲染的樣式
+        const cardBg = document.getElementById("cardBg");
+        const originalBgDisplay = cardBg.style.display;
+        
+        // 如果有背景圖片但沒有正確顯示，嘗試修正
+        if (cardBg.src && !cardBg.complete) {
+          await waitForImageLoad(cardBg);
         }
-      }).catch(error => {
-        console.error('Canvas generation failed:', error);
-        alert('圖片生成失敗，請檢查瀏覽器設定');
-      }).finally(() => {
+
+        const originalWidth = cardWrapper.offsetWidth;
+        const originalHeight = cardWrapper.offsetHeight;
+
+        // 高解析度設定 (4×6吋 at 300 DPI)
+        const desiredWidth = 1800; // 6吋 × 300 DPI
+        const desiredHeight = 1200; // 4吋 × 300 DPI
+        const scaleFactor = Math.min(desiredWidth / originalWidth, desiredHeight / originalHeight);
+
+        console.log('Capturing card:', {
+          originalWidth,
+          originalHeight,
+          scaleFactor,
+          hasBackground: !!cardBg.src
+        });
+
+        const canvas = await html2canvas(card, {
+          width: originalWidth,
+          height: originalHeight,
+          scale: scaleFactor,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: true, // 啟用日誌以便調試
+          letterRendering: true,
+          foreignObjectRendering: false, // 關閉可能有問題的外部對象渲染
+          imageTimeout: 15000,
+          removeContainer: false,
+          async: true,
+          // 確保字體正確渲染
+          onclone: function(clonedDoc) {
+            // 確保克隆的文檔中所有文字都可見
+            const clonedCard = clonedDoc.querySelector('#card');
+            if (clonedCard) {
+              // 強制設置文字顏色以確保可見性
+              const textElements = clonedCard.querySelectorAll('*');
+              textElements.forEach(el => {
+                const computedStyle = window.getComputedStyle(el);
+                if (computedStyle.color) {
+                  el.style.color = computedStyle.color;
+                }
+              });
+            }
+          }
+        });
+
+        // 檢查 canvas 是否有內容
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const hasContent = imageData.data.some((pixel, index) => {
+          // 檢查非透明像素（alpha通道）
+          return index % 4 === 3 && pixel > 0;
+        });
+
+        if (!hasContent) {
+          throw new Error('生成的圖片沒有內容');
+        }
+
+        // 下載圖片
+        const link = document.createElement("a");
+        const now = new Date();
+        const timestamp = now.getFullYear() + 
+                        String(now.getMonth() + 1).padStart(2, '0') + 
+                        String(now.getDate()).padStart(2, '0') + '_' +
+                        String(now.getHours()).padStart(2, '0') + 
+                        String(now.getMinutes()).padStart(2, '0');
+        
+        link.download = `invitation-card_${timestamp}.png`;
+        link.href = canvas.toDataURL("image/png", 1.0);
+        
+        // 確保下載鏈接正確
+        if (!link.href || link.href === 'data:,') {
+          throw new Error('圖片數據生成失敗');
+        }
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        console.log('Download successful');
+
+      } catch (error) {
+        console.error('Download failed:', error);
+        alert(`下載失敗: ${error.message}\n請確保：\n1. 已填入卡片內容\n2. 背景圖片已正確載入\n3. 瀏覽器支援該功能`);
+      } finally {
         // 恢復按鈕狀態
-        button.textContent = originalText;
-        button.disabled = false;
+        if (button) {
+          button.textContent = originalText;
+          button.disabled = false;
+        }
+      }
+    }
+
+    // 輔助函數：等待圖片載入
+    function waitForImageLoad(img) {
+      return new Promise((resolve, reject) => {
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = resolve;
+          img.onerror = reject;
+          // 5秒超時
+          setTimeout(() => reject(new Error('圖片載入超時')), 5000);
+        }
       });
+    }
+
+    // 輔助函數：確保所有內容都已載入
+    async function ensureContentLoaded() {
+      // 等待字體載入
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      
+      // 等待圖片載入
+      const images = document.querySelectorAll('#card img');
+      const imagePromises = Array.from(images).map(img => {
+        if (img.src && !img.complete) {
+          return waitForImageLoad(img);
+        }
+        return Promise.resolve();
+      });
+      
+      await Promise.all(imagePromises);
+      
+      // 額外等待以確保渲染完成
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     // 頁面載入完成後初始化
