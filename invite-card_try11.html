@@ -294,115 +294,105 @@
     let qrCodeInstance = null;
 
     function updateCard() {
-  // ✅ 調整卡片寬度
-  const cardWrapper = document.getElementById("cardWrapper");
-  cardWrapper.style.width = "100%";
-  cardWrapper.scrollIntoView({ behavior: "smooth" });
-
-  const name = document.getElementById("name").value;
-  const desc = document.getElementById("description").value;
-  const addr = document.getElementById("address").value;
-  const date = document.getElementById("date").value;
-  const time = document.getElementById("time").value;
-  const host = document.getElementById("host").value;
-  const contact = document.getElementById("contact").value;
-  const textColor = document.getElementById("textColor").value;
-
-  document.getElementById("cardName").textContent = name;
-  document.getElementById("cardDescription").textContent = desc;
-  document.getElementById("cardAddress").textContent = addr;
-  document.getElementById("cardHost").textContent = host;
-  document.getElementById("cardContact").textContent = contact;
-  document.getElementById("timeLine").textContent = time;
-
-  const [y, m, d] = date.split("-");
-  document.getElementById("yearLine").textContent = y || '';
-  document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
-
-  const card = document.getElementById("card");
-  card.className = `card ${textColor}`;
-
-  document.querySelectorAll('iconify-icon').forEach(icon => {
-    icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
-  });
-
-  const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
-  const qrCodeContainer = document.getElementById("qrCodeContainer");
-
-  if (qrCodeInstance) {
-    qrCodeContainer.innerHTML = '';
-    qrCodeInstance = null;
-  }
-
-  if (addr) {
-    qrCodeInstance = new QRCode(qrCodeContainer, {
-      text: mapURL,
-      width: 100,
-      height: 100,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
+      const name = document.getElementById("name").value;
+      const desc = document.getElementById("description").value;
+      const addr = document.getElementById("address").value;
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value;
+      const host = document.getElementById("host").value;
+      const contact = document.getElementById("contact").value;
+      const textColor = document.getElementById("textColor").value;
+    
+      document.getElementById("cardName").textContent = name;
+      document.getElementById("cardDescription").textContent = desc;
+      document.getElementById("cardAddress").textContent = addr;
+      document.getElementById("cardHost").textContent = host;
+      document.getElementById("cardContact").textContent = contact;
+      document.getElementById("timeLine").textContent = time;
+    
+      const [y, m, d] = date.split("-");
+      document.getElementById("yearLine").textContent = y || '';
+      document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
+    
+      const card = document.getElementById("card");
+      card.className = `card ${textColor}`;
+    
+      document.querySelectorAll('iconify-icon').forEach(icon => {
+        icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
+      });
+    
+      const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+      const qrCodeContainer = document.getElementById("qrCodeContainer");
+    
+      if (qrCodeInstance) {
+        qrCodeContainer.innerHTML = '';
+        qrCodeInstance = null;
+      }
+    
+      if (addr) {
+        qrCodeInstance = new QRCode(qrCodeContainer, {
+          text: mapURL,
+          width: 100,
+          height: 100,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      } else {
+        qrCodeContainer.innerHTML = '';
+      }
+    
+      const bgInput = document.getElementById("bgImage");
+      const cardBg = document.getElementById("cardBg");
+      if (bgInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          cardBg.src = e.target.result;
+        };
+        reader.readAsDataURL(bgInput.files[0]);
+      } else {
+        cardBg.src = '';
+      }
+    }
+  
+  function downloadImage() {
+    const cardWrapper = document.getElementById("cardWrapper");
+    const card = document.getElementById("card");
+  
+    const originalWidth = card.offsetWidth;
+    const originalHeight = card.offsetHeight;
+    const desiredWidth = 1800;
+    const desiredHeight = 1200;
+    const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
+  
+    html2canvas(card, {
+      width: originalWidth,
+      height: originalHeight,
+      scale: scaleFactor,
+      useCORS: true,
+      logging: false,
+      letterRendering: 1,
+      allowTaint: true
+    }).then(canvas => {
+      cardWrapper.style.width = originalWidthStyle; // ✅ 還原寬度
+  
+      canvas.toBlob(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = "invitation-card.png";
+  
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 'image/png');
+    }).catch(err => {
+      cardWrapper.style.width = originalWidthStyle;
+      alert("⚠️ 無法產生卡片圖像，請確認內容與圖片");
+      console.error(err);
     });
-  } else {
-    qrCodeContainer.innerHTML = '';
   }
-
-  const bgInput = document.getElementById("bgImage");
-  const cardBg = document.getElementById("cardBg");
-  if (bgInput.files.length > 0) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      cardBg.src = e.target.result;
-    };
-    reader.readAsDataURL(bgInput.files[0]);
-  } else {
-    cardBg.src = '';
-  }
-}
-
-function downloadImage() {
-  const cardWrapper = document.getElementById("cardWrapper");
-  const card = document.getElementById("card");
-
-  // ✅ 調整寬度並記錄原本設定
-  const originalWidthStyle = cardWrapper.style.width;
-  cardWrapper.style.width = "100%";
-  cardWrapper.scrollIntoView({ behavior: "smooth" });
-
-  const originalWidth = card.offsetWidth;
-  const originalHeight = card.offsetHeight;
-  const desiredWidth = 1800;
-  const desiredHeight = 1200;
-  const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
-
-  html2canvas(card, {
-    width: originalWidth,
-    height: originalHeight,
-    scale: scaleFactor,
-    useCORS: true,
-    logging: false,
-    letterRendering: 1,
-    allowTaint: true
-  }).then(canvas => {
-    cardWrapper.style.width = originalWidthStyle; // ✅ 還原寬度
-
-    canvas.toBlob(blob => {
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = "invitation-card.png";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    }, 'image/png');
-  }).catch(err => {
-    cardWrapper.style.width = originalWidthStyle;
-    alert("⚠️ 無法產生卡片圖像，請確認內容與圖片");
-    console.error(err);
-  });
-}
   </script>
 </body>
 </html>
