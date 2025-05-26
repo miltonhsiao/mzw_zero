@@ -360,52 +360,50 @@
       }
     }
 
-    function downloadImage() {
-      const cardWrapper = document.getElementById("cardWrapper");
-      const card = document.getElementById("card");
-      const originalWidth = cardWrapper.offsetWidth;
-      const originalHeight = cardWrapper.offsetHeight;
+function downloadImage() {
+  const card = document.getElementById("card");
+  const originalWidth = card.offsetWidth;
+  const originalHeight = card.offsetHeight;
 
-      // Define a higher resolution for the downloaded image
-      const desiredWidth = 1800; // For 6-inch print at 300 DPI (6 * 300 = 1800)
-      const desiredHeight = 1200; // For 4-inch print at 300 DPI (4 * 300 = 1200)
+  const desiredWidth = 1800;
+  const desiredHeight = 1200;
+  const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
 
-      // Calculate scale factor based on desired output size relative to current card size
-      const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
-
-      html2canvas(card, {
-        width: originalWidth, // Use original width for capturing, then scale
-        height: originalHeight, // Use original height for capturing, then scale
-        scale: scaleFactor, // Apply the calculated scale factor
-        useCORS: true,
-        logging: false, // Suppress console logs from html2canvas
-        letterRendering: 1, // Attempt to improve text rendering
-        allowTaint: true // Allow images from other origins (if any) to be rendered, might be needed for dynamic background images
-        foreignObjectRendering: true // 添加 foreignObjectRendering 嘗試解決部分手機瀏覽器問題
-      }).then(canvas => {
-        // 確保在 mobile 上可以正確觸發下載
-        if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone|iPad|iPod/i)) { // 修正點 3
-          // For mobile, open in a new window or trigger a download with a simulated click
-          const imageData = canvas.toDataURL("image/png");
+  html2canvas(card, {
+    width: originalWidth,
+    height: originalHeight,
+    scale: scaleFactor,
+    useCORS: true,
+    logging: false,
+    letterRendering: 1,
+    allowTaint: true
+    // foreignObjectRendering: true // ← 建議移除以增加相容性
+  }).then(canvas => {
+    try {
+      canvas.toBlob(function(blob) {
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          // For IE
+          window.navigator.msSaveOrOpenBlob(blob, "invitation-card.png");
+        } else {
           const link = document.createElement("a");
-          link.href = imageData;
+          link.href = URL.createObjectURL(blob);
           link.download = "invitation-card.png";
+
+          // 為了支援 iOS Safari
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-        } else {
-          // For desktop, standard download
-          const link = document.createElement("a");
-          link.download = "invitation-card.png";
-          link.href = canvas.toDataURL("image/png");
-          link.click();
         }
-      }).catch(error => { // 修正點 4：添加錯誤處理
-        console.error("Oops, something went wrong!", error);
-        alert("下載圖片時發生錯誤，請稍後再試或檢查圖片來源。");
-      });
+      }, "image/png");
+    } catch (e) {
+      alert("抱歉，發生錯誤：下載可能不被此瀏覽器支援");
+      console.error(e);
     }
+  }).catch(err => {
+    alert("無法產生卡片圖像，請確認是否背景圖片已上傳並避免使用特殊字元");
+    console.error("html2canvas 錯誤：", err);
+  });
+}
   </script>
-
 </body>
 </html>
