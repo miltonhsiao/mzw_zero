@@ -295,87 +295,87 @@
     let qrCodeInstance = null;
 
     function updateCard() {
-      const name = document.getElementById("name").value;
-      const desc = document.getElementById("description").value;
-      const addr = document.getElementById("address").value;
-      const date = document.getElementById("date").value;
-      const time = document.getElementById("time").value;
-      const host = document.getElementById("host").value;
-      const contact = document.getElementById("contact").value;
-      const textColor = document.getElementById("textColor").value;
+  // ✅ 調整卡片寬度
+  const cardWrapper = document.getElementById("cardWrapper");
+  cardWrapper.style.width = "100%";
+  cardWrapper.scrollIntoView({ behavior: "smooth" });
 
-      document.getElementById("cardName").textContent = name;
-      document.getElementById("cardDescription").textContent = desc;
-      document.getElementById("cardAddress").textContent = addr;
-      document.getElementById("cardHost").textContent = host;
-      document.getElementById("cardContact").textContent = contact;
-      document.getElementById("timeLine").textContent = time;
+  const name = document.getElementById("name").value;
+  const desc = document.getElementById("description").value;
+  const addr = document.getElementById("address").value;
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+  const host = document.getElementById("host").value;
+  const contact = document.getElementById("contact").value;
+  const textColor = document.getElementById("textColor").value;
 
-      const [y, m, d] = date.split("-");
-      document.getElementById("yearLine").textContent = y || '';
-      document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
+  document.getElementById("cardName").textContent = name;
+  document.getElementById("cardDescription").textContent = desc;
+  document.getElementById("cardAddress").textContent = addr;
+  document.getElementById("cardHost").textContent = host;
+  document.getElementById("cardContact").textContent = contact;
+  document.getElementById("timeLine").textContent = time;
 
-      const card = document.getElementById("card");
-      card.className = `card ${textColor}`;
+  const [y, m, d] = date.split("-");
+  document.getElementById("yearLine").textContent = y || '';
+  document.getElementById("monthDayLine").textContent = (m && d) ? `${m}/${d}` : '';
 
-      document.querySelectorAll('iconify-icon').forEach(icon => {
-        icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
-      });
+  const card = document.getElementById("card");
+  card.className = `card ${textColor}`;
 
-      // Corrected Google Maps URL for address search
-      // Note: This URL format might not always directly open Google Maps app.
-      // A more reliable way for app deep linking is often via specific Google Maps URL schemes or APIs.
-      const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
-      const qrCodeContainer = document.getElementById("qrCodeContainer");
+  document.querySelectorAll('iconify-icon').forEach(icon => {
+    icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
+  });
 
-      if (qrCodeInstance) {
-        qrCodeContainer.innerHTML = '';
-        qrCodeInstance = null;
-      }
+  const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+  const qrCodeContainer = document.getElementById("qrCodeContainer");
 
-      if (addr) {
-        qrCodeInstance = new QRCode(qrCodeContainer, {
-          text: mapURL,
-          width: 100, // Adjusted QR Code size for better scanability when downloaded
-          height: 100,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      } else {
-        qrCodeContainer.innerHTML = '';
-      }
+  if (qrCodeInstance) {
+    qrCodeContainer.innerHTML = '';
+    qrCodeInstance = null;
+  }
 
-      const bgInput = document.getElementById("bgImage");
-      const cardBg = document.getElementById("cardBg"); // Get the img element
-      if (bgInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = function (e) {          
-          cardBg.src = e.target.result; // Also set the src of the hidden img tag
-        };
-        reader.readAsDataURL(bgInput.files[0]);
-      } else {        
-        cardBg.src = ''; // Clear the src if no image is selected
-      }
-    }
+  if (addr) {
+    qrCodeInstance = new QRCode(qrCodeContainer, {
+      text: mapURL,
+      width: 100,
+      height: 100,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } else {
+    qrCodeContainer.innerHTML = '';
+  }
+
+  const bgInput = document.getElementById("bgImage");
+  const cardBg = document.getElementById("cardBg");
+  if (bgInput.files.length > 0) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      cardBg.src = e.target.result;
+    };
+    reader.readAsDataURL(bgInput.files[0]);
+  } else {
+    cardBg.src = '';
+  }
+}
 
 function downloadImage() {
   const cardWrapper = document.getElementById("cardWrapper");
   const card = document.getElementById("card");
 
-  // ✅ 1. 暫時將 card 寬度設定為 100%
+  // ✅ 調整寬度並記錄原本設定
   const originalWidthStyle = cardWrapper.style.width;
   cardWrapper.style.width = "100%";
+  cardWrapper.scrollIntoView({ behavior: "smooth" });
 
-  // ✅ 2. 計算寬高與比例
   const originalWidth = card.offsetWidth;
   const originalHeight = card.offsetHeight;
-
   const desiredWidth = 1800;
   const desiredHeight = 1200;
   const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
 
-  // ✅ 3. 開始畫圖
   html2canvas(card, {
     width: originalWidth,
     height: originalHeight,
@@ -384,12 +384,9 @@ function downloadImage() {
     logging: false,
     letterRendering: 1,
     allowTaint: true
-    // foreignObjectRendering: true // 不建議開啟
   }).then(canvas => {
-    // ✅ 4. 還原寬度
-    cardWrapper.style.width = originalWidthStyle;
+    cardWrapper.style.width = originalWidthStyle; // ✅ 還原寬度
 
-    // ✅ 5. 建立 Blob 並觸發下載
     canvas.toBlob(blob => {
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
