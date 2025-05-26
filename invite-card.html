@@ -145,26 +145,201 @@
       font-size: 0.875rem;
       z-index: 1; /* 確保 footer 也在圖片之上 */
     }
-    @media (max-width: 768px) {
+    /* 響應式設計 - 大型桌面 */
+    @media screen and (min-width: 1400px) {
+      .card-container {
+        max-width: 45rem;
+      }
+      
+      .event-name {
+        font-size: 1.8rem;
+      }
+      
+      .month-day {
+        font-size: 4rem;
+      }
+      
+      #timeLine {
+        font-size: 2.5rem;
+      }
+    }
+
+    /* 響應式設計 - 平板橫向 */
+    @media screen and (max-width: 1024px) {
+      :root {
+        --card-width: 32rem;
+        --card-height: 21.33rem;
+      }
+      
+      body {
+        padding: 0.75rem;
+      }
+      
+      .left {
+        padding-right: 0.75rem;
+      }
+    }
+
+    /* 響應式設計 - 平板直向 */
+    @media screen and (max-width: 768px) {
+      :root {
+        --card-width: 28rem;
+        --card-height: 18.67rem;
+      }
+      
+      body {
+        padding: 0.5rem;
+      }
+      
+      .button-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      
+      .card {
+        padding: 0.75rem;
+      }
+      
+      .left {
+        width: 60%;
+        padding-right: 0.5rem;
+      }
+      
+      .right {
+        width: 40%;
+      }
+      
+      .qr {
+        width: clamp(3.5rem, 7vw, 5rem);
+        height: clamp(3.5rem, 7vw, 5rem);
+      }
+    }
+
+    /* 響應式設計 - 手機橫向 */
+    @media screen and (max-width: 640px) {
       .card {
         flex-direction: column;
         text-align: left;
+        gap: 0.75rem;
       }
+      
       .left, .right {
         width: 100%;
         align-items: flex-start;
         text-align: left;
       }
+      
       .right {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .right > div {
         align-items: flex-start;
-        margin-top: 1em;
+        text-align: left;
       }
-      .month-day, #timeLine {
-        font-size: 2rem;
+      
+      .right > div:last-child {
+        align-items: flex-end;
+        text-align: right;
       }
+      
+      .month-day {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+      }
+      
+      #timeLine {
+        font-size: clamp(1rem, 2.5vw, 1.5rem);
+      }
+      
       .qr {
-        width: 5em;
-        height: 5em;
+        width: clamp(3rem, 6vw, 4rem);
+        height: clamp(3rem, 6vw, 4rem);
+      }
+    }
+
+    /* 響應式設計 - 小型手機 */
+    @media screen and (max-width: 480px) {
+      body {
+        padding: 0.25rem;
+      }
+      
+      .card {
+        padding: 0.5rem;
+        gap: 0.5rem;
+      }
+      
+      .event-name {
+        font-size: clamp(0.875rem, 3vw, 1.25rem);
+      }
+      
+      .month-day {
+        font-size: clamp(1.25rem, 5vw, 2rem);
+      }
+      
+      #timeLine {
+        font-size: clamp(0.875rem, 3vw, 1.25rem);
+      }
+      
+      .icon-label {
+        font-size: clamp(0.7rem, 2.5vw, 0.875rem);
+      }
+      
+      .icon-label iconify-icon {
+        font-size: clamp(0.875rem, 2.5vw, 1rem);
+      }
+      
+      .card-footer {
+        font-size: 0.625rem;
+        bottom: 0.25rem;
+      }
+    }
+
+    /* 高度受限的設備適配 */
+    @media screen and (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .form-container, .description {
+        margin-bottom: 0.75rem;
+      }
+      
+      .card-container {
+        margin-top: 0.75rem;
+      }
+      
+      .footer {
+        margin-top: 1rem;
+      }
+    }
+
+    /* 印刷樣式 */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      .form-container, .description, .footer {
+        display: none;
+      }
+      
+      .card-container {
+        max-width: none;
+        width: 6in;
+        height: 4in;
+        margin: 0;
+        box-shadow: none;
+      }
+      
+      .card {
+        border: 1px solid #000;
+      }
+      
+      .card-footer {
+        display: none;
       }
     }
   </style>
