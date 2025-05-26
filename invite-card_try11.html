@@ -381,11 +381,28 @@
         logging: false, // Suppress console logs from html2canvas
         letterRendering: 1, // Attempt to improve text rendering
         allowTaint: true // Allow images from other origins (if any) to be rendered, might be needed for dynamic background images
+        foreignObjectRendering: true // 添加 foreignObjectRendering 嘗試解決部分手機瀏覽器問題
       }).then(canvas => {
-        const link = document.createElement("a");
-        link.download = "invitation-card.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        // 確保在 mobile 上可以正確觸發下載
+        if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone|iPad|iPod/i)) { // 修正點 3
+          // For mobile, open in a new window or trigger a download with a simulated click
+          const imageData = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.href = imageData;
+          link.download = "invitation-card.png";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          // For desktop, standard download
+          const link = document.createElement("a");
+          link.download = "invitation-card.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+      }).catch(error => { // 修正點 4：添加錯誤處理
+        console.error("Oops, something went wrong!", error);
+        alert("下載圖片時發生錯誤，請稍後再試或檢查圖片來源。");
       });
     }
   </script>
