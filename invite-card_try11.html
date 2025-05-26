@@ -48,15 +48,15 @@
       gap: 0.625rem;
       flex-wrap: wrap;
     }
-    .card-container {
+    .card-container { /* 第一層 */
       width: 37.5rem;
       height: 25rem;
       position: relative;
       margin-top: 1.25rem;
     }
-    .card {
-      width: 100%;
-      height: 100%;
+    .card { /* 第二層 */
+      width: 37.5rem;
+      height: 25rem;
       display: flex;
       flex-direction: row;
       background-size: cover;
@@ -68,7 +68,7 @@
       position: relative;
       overflow: hidden;
     }
-    .card-bg {
+    .card-bg { /* 背景圖片 */
       position: absolute;
       top: 0;
       left: 0;
