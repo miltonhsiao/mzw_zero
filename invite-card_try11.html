@@ -377,31 +377,26 @@ function downloadImage() {
     logging: false,
     letterRendering: 1,
     allowTaint: true
-    // foreignObjectRendering: true // ← 建議移除以增加相容性
+    
   }).then(canvas => {
-    try {
-      canvas.toBlob(function(blob) {
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-          // For IE
-          window.navigator.msSaveOrOpenBlob(blob, "invitation-card.png");
-        } else {
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = "invitation-card.png";
+    canvas.toBlob(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
 
-          // 為了支援 iOS Safari
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-      }, "image/png");
-    } catch (e) {
-      alert("抱歉，發生錯誤：下載可能不被此瀏覽器支援");
-      console.error(e);
-    }
+      link.href = blobUrl;
+      link.download = "invitation-card.png";
+
+      // 解決手機 Chrome 的「無反應」問題：將 <a> 插入 DOM 再觸發 click
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 釋放資源
+      URL.revokeObjectURL(blobUrl);
+    }, 'image/png');
   }).catch(err => {
-    alert("無法產生卡片圖像，請確認是否背景圖片已上傳並避免使用特殊字元");
-    console.error("html2canvas 錯誤：", err);
+    alert("⚠️ 無法產生卡片圖像，可能是圖片來源或瀏覽器限制導致錯誤");
+    console.error(err);
   });
 }
   </script>
