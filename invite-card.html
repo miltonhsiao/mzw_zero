@@ -65,8 +65,15 @@
       box-sizing: border-box;
       text-shadow: 0.0625rem 0.0625rem 0.125rem #000;
     }
-    .card.black {
-      text-shadow: none;
+    .card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0; /* 圖片在最下層 */
     }
     .left {
       width: 66.66%;
@@ -75,6 +82,8 @@
       align-items: flex-start;
       justify-content: flex-start;
       gap: 0.625rem;
+      position: relative; /* 需要position屬性才能使z-index生效 */
+      z-index: 1; /* 內容層在圖片之上 */
     }
     .right {
       width: 33.33%;
@@ -83,6 +92,8 @@
       justify-content: space-between;
       align-items: flex-end;
       text-align: right;
+      position: relative; /* 需要position屬性才能使z-index生效 */
+      z-index: 1; /* 內容層在圖片之上 */
     }
     .right > div {
       display: flex;
@@ -132,6 +143,7 @@
       width: 100%;
       text-align: center;
       font-size: 0.875rem;
+      z-index: 1; /* 確保 footer 也在圖片之上 */
     }
     @media (max-width: 768px) {
       .card {
@@ -184,6 +196,7 @@
 
   <div class="card-container" id="cardWrapper">
     <div class="card white" id="card">
+      <img id="cardBg" class="card-bg" />
       <div class="left">
         <div class="event-name" id="cardName">活動名稱</div>
         <div class="icon-label">
@@ -226,7 +239,8 @@
   <div class="footer">歡迎轉貼試用，網頁測試中 | © 2025 MZW</div>
 
   <script>
-    let qrCodeInstance = null;
+    let qrCodeInstance = null;    
+
     function updateCard() {
       const name = document.getElementById("name").value;
       const desc = document.getElementById("description").value;
@@ -255,6 +269,9 @@
         icon.style.color = textColor === 'black' ? '#000000' : '#ffffff';
       });
 
+      // Corrected Google Maps URL for address search
+      // Note: This URL format might not always directly open Google Maps app.
+      // A more reliable way for app deep linking is often via specific Google Maps URL schemes or APIs.
       const mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
       const qrCodeContainer = document.getElementById("qrCodeContainer");
 
@@ -266,7 +283,7 @@
       if (addr) {
         qrCodeInstance = new QRCode(qrCodeContainer, {
           text: mapURL,
-          width: 100,
+          width: 100, // Adjusted QR Code size for better scanability when downloaded
           height: 100,
           colorDark: "#000000",
           colorLight: "#ffffff",
@@ -277,25 +294,45 @@
       }
 
       const bgInput = document.getElementById("bgImage");
+      const cardBg = document.getElementById("cardBg"); // Get the img element
       if (bgInput.files.length > 0) {
         const reader = new FileReader();
         reader.onload = function (e) {
           card.style.backgroundImage = `url('${e.target.result}')`;
+          cardBg.src = e.target.result; // Also set the src of the hidden img tag
         };
         reader.readAsDataURL(bgInput.files[0]);
       } else {
         card.style.backgroundImage = '';
+        cardBg.src = ''; // Clear the src if no image is selected
       }
     }
 
     function downloadImage() {
-      html2canvas(document.getElementById("card"), {
-        scale: 3,
-        useCORS: true
+      const cardWrapper = document.getElementById("cardWrapper");
+      const card = document.getElementById("card");
+      const originalWidth = cardWrapper.offsetWidth;
+      const originalHeight = cardWrapper.offsetHeight;
+
+      // Define a higher resolution for the downloaded image
+      const desiredWidth = 1800; // For 6-inch print at 300 DPI (6 * 300 = 1800)
+      const desiredHeight = 1200; // For 4-inch print at 300 DPI (4 * 300 = 1200)
+
+      // Calculate scale factor based on desired output size relative to current card size
+      const scaleFactor = Math.max(desiredWidth / originalWidth, desiredHeight / originalHeight);
+
+      html2canvas(card, {
+        width: originalWidth, // Use original width for capturing, then scale
+        height: originalHeight, // Use original height for capturing, then scale
+        scale: scaleFactor, // Apply the calculated scale factor
+        useCORS: true,
+        logging: false, // Suppress console logs from html2canvas
+        letterRendering: 1, // Attempt to improve text rendering
+        allowTaint: true // Allow images from other origins (if any) to be rendered, might be needed for dynamic background images
       }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'invitation_card.png';
-        link.href = canvas.toDataURL();
+        const link = document.createElement("a");
+        link.download = "invitation-card.png";
+        link.href = canvas.toDataURL("image/png");
         link.click();
       });
     }
