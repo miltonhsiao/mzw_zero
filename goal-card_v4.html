@@ -13,7 +13,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
       text-align: center;
       background-color: #eceae6;
-      margin: 0;
+      margin: 2rem;
       padding: 0;
     }
 
@@ -40,6 +40,7 @@
     }
 
     button {
+      border-radius: 3rem;
       background-color: #00b5d8;
       color: white;
       cursor: pointer;
@@ -57,6 +58,14 @@
       text-align-last: center;
     }
 
+    #previewCanvas {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      margin-top: 0.5rem;
+      display: block;
+    }
+
     footer {
       margin-top: 2rem;
       font-size: 1rem;
@@ -68,7 +77,7 @@
   <h2>產生目標集點卡</h2>
   <div class="description">
     只要打字+上傳圖片就可以產生目標集點卡，記錄你的每一步。格數採每週5天共4週設計20格，計畫一個月內可以達成目標。
-    (適用4*6吋列印)朝更好的自己更近一步!
+    (適用4*6吋列印)<br>朝更好的自己更近一步!
   </div>
   <div class="controls">
     <input type="text" id="goal" placeholder="目標" maxlength="10">
