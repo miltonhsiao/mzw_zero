@@ -152,10 +152,29 @@
     let bgImage = null;
 
     function drawFullCanvas() {
-      if (bgImage) {
-        fullCtx.clearRect(0, 0, fullCanvas.width, fullCanvas.height);
-        fullCtx.drawImage(bgImage, 0, 0, fullCanvas.width, fullCanvas.height);
+      if (!bgImage) return;
+
+      fullCtx.clearRect(0, 0, fullCanvas.width, fullCanvas.height);
+
+      const canvasAspect = fullCanvas.width / fullCanvas.height;
+      const imageAspect = bgImage.width / bgImage.height;
+
+      let drawWidth, drawHeight;
+      let offsetX = 0, offsetY = 0;
+
+      if (imageAspect > canvasAspect) {
+        // 圖片比較寬，要裁左右
+        drawHeight = fullCanvas.height;
+        drawWidth = bgImage.width * (fullCanvas.height / bgImage.height);
+        offsetX = (fullCanvas.width - drawWidth) / 2;
+      } else {
+        // 圖片比較高，要裁上下
+        drawWidth = fullCanvas.width;
+        drawHeight = bgImage.height * (fullCanvas.width / bgImage.width);
+        offsetY = (fullCanvas.height - drawHeight) / 2;
       }
+
+      fullCtx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     function updatePreviewCanvas() {
