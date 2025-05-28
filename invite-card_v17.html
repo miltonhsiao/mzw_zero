@@ -321,12 +321,23 @@
       updatePreviewCanvas();
     });
 
-    downloadBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'invitation-card.png';
-      link.href = fullCanvas.toDataURL('image/png');
-      link.click();
-    });
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      fullCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'invitation-card.png';
+
+        // 真正加入 DOM 再點擊，有助手機支援
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // 釋放資源
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });    
   </script>
 
   <footer>
