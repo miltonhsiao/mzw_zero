@@ -321,23 +321,19 @@
       updatePreviewCanvas();
     });
 
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      fullCanvas.toBlob((blob) => {
+    // 因手機chrome不能下載修改
+    downloadBtn.addEventListener('click', () => {
+      fullCanvas.toBlob(function(blob) {
         const url = URL.createObjectURL(blob);
-
         const link = document.createElement('a');
         link.href = url;
         link.download = 'invitation-card.png';
-
-        // 真正加入 DOM 再點擊，有助手機支援
-        document.body.appendChild(link);
+        document.body.appendChild(link); // 必須加入 DOM 才能觸發下載
         link.click();
         document.body.removeChild(link);
-
-        // 釋放資源
         URL.revokeObjectURL(url);
       }, 'image/png');
-    });    
+    });   
   </script>
 
   <footer>
