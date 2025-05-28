@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>產生目標集點卡</title>  
+  <style>
+    :root {
+      font-size: 14px;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+      text-align: center;
+      background-color: #eceae6;
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
+      border: 1px solid #ccc;      
+      display: block;
+      margin: 0 auto;
+    }
+
+    .controls {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input, select, button {
+      padding: 0.5rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 20rem;
+    }
+
+    button {
+      background-color: #00b5d8;
+      color: white;
+      cursor: pointer;
+    }
+
+    .description {
+      max-width: 30rem;
+      margin: 1rem auto 1.5rem;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.5;
+      text-align: justify;
+      overflow: visible;
+      white-space: normal;
+      text-align-last: center;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>產生目標集點卡</h2>
+  <div class="description">
+    只要打字+上傳圖片就可以產生目標集點卡，記錄你的每一步。格數採每週5天共4週設計20格，計畫一個月內可以達成目標。
+    (適用4*6吋列印)朝更好的自己更近一步!
+  </div>
+  <div class="controls">
+    <input type="text" id="goal" placeholder="目標" maxlength="10">
+    <input type="text" id="yourname" placeholder="送給誰" maxlength="20">
+    <input type="text" id="message" placeholder="想說的話" maxlength="20">
+    <input type="text" id="award" placeholder="達成獎勵" maxlength="20">
+    <input type="text" id="myname" placeholder="我是誰" maxlength="20">
+    <select id="textColor">
+      <option value="#000000">黑色文字</option>
+      <option value="#FFFFFF">白色文字</option>
+    </select>
+    <input type="file" id="bgImage" accept="image/*">
+    <button id="drawTextBtn">繪製卡片</button>
+  </div>
+
+  <canvas id="previewCanvas" width="390" height="585"></canvas>
+  <br>
+  <button id="downloadBtn">下載卡片</button>
+  <p>提醒：Line內建瀏覽器功能受限無法下載，請改用其他瀏覽器App</p> 
+
+  <script>
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = 1200;
+    fullCanvas.height = 1800;
+    const fullCtx = fullCanvas.getContext('2d');
+
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
+
+    const drawTextBtn = document.getElementById('drawTextBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    let bgImage = null;
+
+    function drawFullCanvas() {
+      if (!bgImage) return;
+
+      const canvasRatio = fullCanvas.width / fullCanvas.height;
+      const imgRatio = bgImage.width / bgImage.height;
+
+      let drawWidth, drawHeight, offsetX, offsetY;
+
+      if (imgRatio > canvasRatio) {
+        // 圖片比 canvas 寬，橫向裁切
+        drawHeight = fullCanvas.height;
+        drawWidth = bgImage.width * (fullCanvas.height / bgImage.height);
+        offsetX = (fullCanvas.width - drawWidth) / 2;
+        offsetY = 0;
+      } else {
+        // 圖片比 canvas 高，垂直裁切
+        drawWidth = fullCanvas.width;
+        drawHeight = bgImage.height * (fullCanvas.width / bgImage.width);
+        offsetX = 0;
+        offsetY = (fullCanvas.height - drawHeight) / 2;
+      }
+
+      fullCtx.clearRect(0, 0, fullCanvas.width, fullCanvas.height);
+      fullCtx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    function updatePreviewCanvas() {
+      previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      previewCtx.drawImage(fullCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+    }
+ 
+    document.getElementById('bgImage').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          bgImage = img;
+          drawFullCanvas();
+          updatePreviewCanvas();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    drawTextBtn.addEventListener('click', () => {
+      if (!bgImage) {
+        alert("請先上傳背景圖片！");
+        return;
+      }
+
+      // 取得輸入值
+      const goal = document.getElementById("goal").value;
+      const yourname = document.getElementById("yourname").value;
+      const message = document.getElementById("message").value;
+      const award = document.getElementById("award").value;
+      const myname = document.getElementById("myname").value;
+      const textColor = document.getElementById("textColor").value;
+      const date = new Date().toISOString().slice(0, 10);
+
+      fullCtx.clearRect(0, 0, fullCanvas.width, fullCanvas.height);
+      drawFullCanvas();
+
+      // 加陰影
+      if (textColor === '#FFFFFF') {
+        fullCtx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        fullCtx.shadowBlur = 4;
+        fullCtx.shadowOffsetX = 2;
+        fullCtx.shadowOffsetY = 2;
+      } else {        
+        fullCtx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+        fullCtx.shadowBlur = 0;
+        fullCtx.shadowOffsetX = 0;
+        fullCtx.shadowOffsetY = 0;
+      }
+
+      // 繪圖開始
+      fullCtx.fillStyle = textColor;
+      fullCtx.textAlign = "center";
+      fullCtx.font = `bold 100px "Noto Sans TC", sans-serif`;
+      fullCtx.fillText(goal, fullCanvas.width / 2, 300);
+
+      const radius = 100;
+      const cols = 5, rows = 4;
+      const gapX = radius * 0.15;
+      const gapY = radius * 0.15;
+      const startX = (fullCanvas.width - (cols * 2 * radius + (cols - 1) * gapX)) / 2;
+      const startY = 450;
+
+      fullCtx.fillStyle = textColor === "#000000" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.3)";
+      for (let i = 0; i < 20; i++) {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        const cx = startX + radius + col * (2 * radius + gapX);
+        const cy = startY + row * (2 * radius + gapY);
+        fullCtx.beginPath();
+        fullCtx.arc(cx, cy, radius, 0, 2 * Math.PI);
+        fullCtx.fill();
+      }
+
+      let y = startY + 830;
+      fullCtx.fillStyle = textColor;
+      fullCtx.font = `50px 'Noto Sans TC'`;
+      fullCtx.fillText("▶︎ " + yourname, fullCanvas.width / 2, y);
+
+      y += 85;
+      fullCtx.font = `italic 50px 'Noto Sans TC'`;
+      fullCtx.fillText("「" + message + "」", fullCanvas.width / 2, y);
+
+      y += 85;
+      fullCtx.font = `50px 'Noto Sans TC'`;
+      fullCtx.fillText("★ " + award + " ★", fullCanvas.width / 2, y);
+
+      y += 70;
+      fullCtx.fillText(myname + " ◀︎", fullCanvas.width / 2, y);
+
+      y += 70;
+      fullCtx.fillText(date, fullCanvas.width / 2, y);
+
+      y += 150;
+      fullCtx.font = `40px 'Noto Sans TC'`;
+      fullCtx.fillText("© 2025 MZW", fullCanvas.width / 2, y);
+
+      updatePreviewCanvas();
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'goal-card.png';
+      link.href = fullCanvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+
+  <footer>
+    <p>歡迎轉貼試用，網頁測試中 | © 2025 MZW</p>
+  </footer>
+</body>
+</html>
