@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>產生活動邀請卡</title>
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"
+    integrity="sha384-PQo97AeYGykTDZn66F3lXv7pL1Y7EwObISUdqM4EAlV/5Gm3+Uw5XxD1yyMRhkhs"
+    crossorigin="anonymous"></script>
+  <style>
+    :root {
+      font-size: 14px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+      background-color: #f8f8f8;
+      color: #333;
+    }
+
+    h3 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .form-section {
+      width: 100%;
+      max-width: 24rem;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .form-section input,
+    .form-section textarea,
+    .form-section select {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .form-section label {
+      margin-top: 0.5rem;
+      display: block;
+    }
+
+    .button-row {
+      margin: 1rem auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      max-width: 24rem;
+      padding: 0 1rem;
+    }
+
+    button {
+      flex: 1 1 100%;
+      max-width: 12rem;
+      background-color: #00b5d8;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 1rem;
+      margin-top: 2rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h3>產生活動邀請卡</h3>
+  <div class="form-section">
+    <p>只要填入活動資訊＋上傳圖片就完成！適用於 4x6 吋列印。</p>
+    <input type="text" id="name" placeholder="活動名稱" maxlength="10" />
+    <textarea id="description" placeholder="活動說明"></textarea>
+    <input type="text" id="year" placeholder="年份 0000" maxlength="4" />
+    <input type="text" id="date" placeholder="日期 00/00" maxlength="5" />
+    <label>活動時間1</label>
+    <input type="time" id="time1" />
+    <label>活動地點1</label>
+    <input type="text" id="location1" />
+    <label>活動時間2</label>
+    <input type="time" id="time2" />
+    <label>活動地點2</label>
+    <input type="text" id="location2" />
+    <input type="text" id="initiate" placeholder="主辦單位" maxlength="20" />
+    <input type="tel" id="contact" placeholder="連絡電話" maxlength="10" />
+    <label for="upload">背景圖片</label>
+    <input type="file" id="upload" accept="image/*" />
+    <label for="textcolor">文字顏色</label>
+    <select id="textcolor">
+      <option value="black">黑字</option>
+      <option value="white">白字</option>
+    </select>
+  </div>
+
+  <div class="button-row">
+    <button id="drawTextBtn">繪製卡片</button>
+    <canvas id="previewCanvas" width="390" height="260"></canvas>
+    <button id="downloadBtn">下載卡片</button>
+    <p>提醒：Line 內建瀏覽器功能受限無法下載，請改用其他瀏覽器。</p>
+  </div>
+
+  <footer>
+    <p>歡迎轉貼試用，網頁測試中 ｜ © 2025 MZW</p>
+  </footer>
+
+  <script>
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = 1800;
+    fullCanvas.height = 1200;
+    const fullCtx = fullCanvas.getContext('2d');
+
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
+
+    const $ = id => document.getElementById(id);
+    const nameInput = $('name'), descriptionInput = $('description'), yearInput = $('year'),
+      dateInput = $('date'), time1Input = $('time1'), location1Input = $('location1'),
+      time2Input = $('time2'), location2Input = $('location2'), initiateInput = $('initiate'),
+      contactInput = $('contact'), upload = $('upload'), textcolor = $('textcolor'),
+      drawTextBtn = $('drawTextBtn'), downloadBtn = $('downloadBtn');
+
+    let bgImage = null;
+
+    const iconMap = {
+      icon_description: 'material-symbols:tooltip-2',
+      icon_year: 'material-symbols:calendar-month',
+      icon_time1: 'material-symbols:schedule-rounded',
+      icon_location1: 'material-symbols:location-on',
+      icon_time2: 'material-symbols:schedule-rounded',
+      icon_location2: 'material-symbols:location-on',
+      icon_initiate: 'material-symbols:person',
+      icon_contact: 'material-symbols:phone-in-talk',
+    };
+
+    function drawFullCanvas() {
+      if (!bgImage) return;
+      fullCtx.clearRect(0, 0, fullCanvas.width, fullCanvas.height);
+      const canvasAspect = fullCanvas.width / fullCanvas.height;
+      const imageAspect = bgImage.width / bgImage.height;
+      let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+      if (imageAspect > canvasAspect) {
+        drawHeight = fullCanvas.height;
+        drawWidth = bgImage.width * (fullCanvas.height / bgImage.height);
+        offsetX = (fullCanvas.width - drawWidth) / 2;
+      } else {
+        drawWidth = fullCanvas.width;
+        drawHeight = bgImage.height * (fullCanvas.width / bgImage.width);
+        offsetY = (fullCanvas.height - drawHeight) / 2;
+      }
+      fullCtx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    function updatePreviewCanvas() {
+      previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      previewCtx.drawImage(fullCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split('');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n];
+        const testWidth = ctx.measureText(testLine).width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n];
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    function drawIconToCanvas(iconName, color, x, y, size = 50) {
+      const url = `https://api.iconify.design/${iconName}.svg?color=${encodeURIComponent(color)}`;
+      fetch(url)
+        .then(res => res.text())
+        .then(svgText => {
+          const svg = new Blob([svgText], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(svg);
+          const img = new Image();
+          img.onload = function () {
+            fullCtx.drawImage(img, x, y, size, size);
+            updatePreviewCanvas();
+            URL.revokeObjectURL(url);
+          };
+          img.src = url;
+        })
+        .catch(err => console.error('Icon fetch failed:', err));
+    }
+
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          bgImage = img;
+          drawFullCanvas();
+          updatePreviewCanvas();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    drawTextBtn.addEventListener('click', () => {
+      if (!bgImage) {
+        alert("請先上傳背景圖片！");
+        return;
+      }
+
+      drawFullCanvas();
+
+      // ✅ 加上圓形暗角遮罩
+      const cx = fullCanvas.width / 2;
+      const cy = fullCanvas.height / 2;
+      const maxRadius = Math.sqrt(cx * cx + cy * cy);
+      const gradient = fullCtx.createRadialGradient(cx, cy, 0, cx, cy, maxRadius);
+      gradient.addColorStop(0.6, 'rgba(0,0,0,0.0)');
+      gradient.addColorStop(0.75, 'rgba(0,0,0,0.1)');
+      gradient.addColorStop(0.85, 'rgba(0,0,0,0.2)');
+      gradient.addColorStop(0.95, 'rgba(0,0,0,0.35)');
+      gradient.addColorStop(1.0, 'rgba(0,0,0,0.5)');
+      fullCtx.fillStyle = gradient;
+      fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+
+      const color = textcolor.value;
+      const name = nameInput.value.trim();
+      const desc = descriptionInput.value.trim();
+      const year = yearInput.value.trim();
+      const date = dateInput.value.trim();
+      const t1 = time1Input.value.trim();
+      const l1 = location1Input.value.trim();
+      const t2 = time2Input.value.trim();
+      const l2 = location2Input.value.trim();
+      const org = initiateInput.value.trim();
+      const phone = contactInput.value.trim();
+
+      const lineH = fullCanvas.width / 30;
+      const offW = fullCanvas.height / 30;
+      const iconSize = fullCanvas.width / 30;
+      const iconOffset = 15;
+
+      fullCtx.shadowColor = color === 'white' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)';
+      fullCtx.shadowBlur = color === 'white' ? 4 : 0;
+      fullCtx.shadowOffsetX = 2;
+      fullCtx.shadowOffsetY = 2;
+      fullCtx.fillStyle = color;
+
+      const X1 = offW + lineH;
+      const X2 = fullCanvas.width - offW - lineH * 2;
+      let Y1 = offW + lineH;
+      let Y2 = X1;
+      let Y3 = fullCanvas.height - offW;
+      const wrapL = (fullCanvas.width - offW * 4) / 3 * 2;
+      const wrapR = (fullCanvas.width - offW * 4) / 3;
+
+      fullCtx.font = 'bold 100px "Noto Sans TC", sans-serif';
+      fullCtx.textAlign = 'left';
+      fullCtx.fillText(name, X1, Y2 + lineH);
+      fullCtx.font = '50px "Noto Sans TC", sans-serif';
+
+      Y2 += lineH * 2;
+      if (org) drawIconToCanvas(iconMap.icon_initiate, color, X1 - iconSize, Y2 - iconOffset);
+      fullCtx.fillText(org, X1, Y2);
+      Y2 += lineH;
+      if (phone) drawIconToCanvas(iconMap.icon_contact, color, X1 - iconSize, Y2 - iconOffset);
+      fullCtx.fillText(phone, X1, Y2);
+
+      Y3 -= Math.ceil(fullCtx.measureText(desc).width / wrapL) * lineH;
+      wrapText(fullCtx, desc, X1, Y3, wrapL, lineH);
+      if (desc) drawIconToCanvas(iconMap.icon_description, color, X1 - iconSize, Y3 - iconOffset * 2);
+
+      fullCtx.textAlign = 'right';
+      if (t1) drawIconToCanvas(iconMap.icon_time1, color, X2 - iconSize, Y1 + iconOffset);
+      fullCtx.fillText(t1, fullCanvas.width - offW, Y1 += lineH);
+      wrapText(fullCtx, l1, fullCanvas.width - offW, Y1 += lineH, wrapR, lineH);
+
+      if (t2) drawIconToCanvas(iconMap.icon_time2, color, X2 - iconSize, Y1 + iconOffset * 2);
+      fullCtx.fillText(t2, fullCanvas.width - offW, Y1 += lineH * 2);
+      wrapText(fullCtx, l2, fullCanvas.width - offW, Y1 += lineH, wrapR, lineH);
+
+      if (year) drawIconToCanvas(iconMap.icon_year, color, X2 - iconSize, fullCanvas.height - offW * 2 - lineH * 3.3 + iconOffset);
+      fullCtx.fillText(year, fullCanvas.width - offW, fullCanvas.height - offW * 2 - lineH * 2.3);
+      fullCtx.font = 'bold 150px "Noto Sans TC", sans-serif';
+      fullCtx.fillText(date, fullCanvas.width - offW, fullCanvas.height - offW * 2);
+
+      fullCtx.font = '30px sans-serif';
+      fullCtx.textAlign = 'center';
+      fullCtx.fillText("© 2025 MZW", fullCanvas.width / 2, fullCanvas.height - offW);
+
+      updatePreviewCanvas();
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      fullCanvas.toBlob(function (blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'invitation-card.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+  </script>
+</body>
+</html>
