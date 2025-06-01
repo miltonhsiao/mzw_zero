@@ -88,11 +88,11 @@
   </style>
 </head>
 <body>
-  <h3>產生活動邀請卡</h3>
+  <h3>產生橫式活動卡片</h3>
   <div class="form-section">
-    <p>只要填入活動資訊＋上傳圖片就完成！適用於 4x6 吋列印。</p>
-    <input type="text" id="name" placeholder="活動名稱" maxlength="10" />
-    <textarea id="description" placeholder="活動說明"></textarea>
+    <p>只要填入活動資訊＋上傳圖片就完成！適用於 4x6 吋列印。一起來營造每個熱情四射的明天</p>
+    <input type="text" id="name" placeholder="名稱" maxlength="10" />
+    <textarea id="description" placeholder="說明"></textarea>
     <input type="text" id="year" placeholder="年份 0000" maxlength="4" />
     <input type="text" id="date" placeholder="日期 00/00" maxlength="5" />
     <label>活動時間1</label>
@@ -103,11 +103,11 @@
     <input type="time" id="time2" />
     <label>活動地點2</label>
     <input type="text" id="location2" />
-    <input type="text" id="initiate" placeholder="主辦單位" maxlength="20" />
+    <input type="text" id="initiate" placeholder="主辦人" maxlength="20" />
     <input type="tel" id="contact" placeholder="連絡電話" maxlength="10" />
-    <label for="upload">背景圖片</label>
+    <label for="upload">背景圖</label>
     <input type="file" id="upload" accept="image/*" />
-    <label for="textcolor">文字顏色</label>
+    <label for="textcolor">文字色</label>
     <select id="textcolor">
       <option value="black">黑字</option>
       <option value="white">白字</option>
@@ -242,10 +242,10 @@
       const maxRadius = Math.sqrt(cx * cx + cy * cy);
       const gradient = fullCtx.createRadialGradient(cx, cy, 0, cx, cy, maxRadius);
       gradient.addColorStop(0.6, 'rgba(0,0,0,0.0)');
-      gradient.addColorStop(0.75, 'rgba(0,0,0,0.1)');
-      gradient.addColorStop(0.85, 'rgba(0,0,0,0.2)');
-      gradient.addColorStop(0.95, 'rgba(0,0,0,0.35)');
-      gradient.addColorStop(1.0, 'rgba(0,0,0,0.5)');
+      gradient.addColorStop(0.75, 'rgba(0,0,0,0.15)');
+      gradient.addColorStop(0.85, 'rgba(0,0,0,0.3)');
+      gradient.addColorStop(0.95, 'rgba(0,0,0,0.45)');
+      gradient.addColorStop(1.0, 'rgba(0,0,0,0.6)');
       fullCtx.fillStyle = gradient;
       fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
 
@@ -287,18 +287,18 @@
 
       Y2 += lineH * 2;
       if (org) drawIconToCanvas(iconMap.icon_initiate, color, X1 - iconSize, Y2 - iconOffset);
-      fullCtx.fillText(org, X1, Y2);
+      fullCtx.fillText(org, X1, Y2 + lineH*0.5);
       Y2 += lineH;
       if (phone) drawIconToCanvas(iconMap.icon_contact, color, X1 - iconSize, Y2 - iconOffset);
-      fullCtx.fillText(phone, X1, Y2);
+      fullCtx.fillText(phone, X1, Y2 + lineH*0.5);
 
       Y3 -= Math.ceil(fullCtx.measureText(desc).width / wrapL) * lineH;
       wrapText(fullCtx, desc, X1, Y3, wrapL, lineH);
-      if (desc) drawIconToCanvas(iconMap.icon_description, color, X1 - iconSize, Y3 - iconOffset * 2);
+      if (desc) drawIconToCanvas(iconMap.icon_description, color, X1 - iconSize, Y3 - iconOffset*3);
 
       fullCtx.textAlign = 'right';
-      if (t1) drawIconToCanvas(iconMap.icon_time1, color, X2 - iconSize, Y1 + iconOffset);
-      fullCtx.fillText(t1, fullCanvas.width - offW, Y1 += lineH);
+      if (t1) drawIconToCanvas(iconMap.icon_time1, color, X2 - iconSize, Y1 + iconOffset -lineH*0.75);
+      fullCtx.fillText(t1, fullCanvas.width - offW, Y1 += lineH*0.25);
       wrapText(fullCtx, l1, fullCanvas.width - offW, Y1 += lineH, wrapR, lineH);
 
       if (t2) drawIconToCanvas(iconMap.icon_time2, color, X2 - iconSize, Y1 + iconOffset * 2);
